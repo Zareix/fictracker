@@ -3,6 +3,7 @@ import {
   index,
   int,
   integer,
+  primaryKey,
   sqliteTable,
   text,
 } from "drizzle-orm/sqlite-core";
@@ -34,10 +35,19 @@ export const fanfics = sqliteTable(
     website: text("website", { length: 256 }).notNull(),
     summary: text("summary", { length: 256 }).notNull(),
     likesCount: int("likes_count", { mode: "number" }).notNull(),
-    tags: text("tags", { length: 256 }).notNull(),
-    writingCompleted: int("writing_completed", { mode: "boolean" }).notNull(),
-    fandom: text("fandom", { length: 256 }).notNull(),
-    ships: text("ships", { length: 256 }).notNull(),
+    tags: text("tags", { mode: "json" })
+      .notNull()
+      .$type<string[]>()
+      .default(sql`'[]'`),
+    isCompleted: int("is_completed", { mode: "boolean" }).notNull(),
+    fandom: text("fandom", { mode: "json" })
+      .notNull()
+      .$type<string[]>()
+      .default(sql`'[]'`),
+    ships: text("ships", { mode: "json" })
+      .notNull()
+      .$type<string[]>()
+      .default(sql`'[]'`),
     language: text("language", { length: 256 }).notNull(),
 
     createdAt: int("created_at", { mode: "timestamp" })
@@ -50,14 +60,57 @@ export const fanfics = sqliteTable(
   (table) => [index("fanfic_title_idx").on(table.title)],
 );
 
-// export const fanficsRelations = relations(fanfics, ({ many, one }) => ({
-//   shelve: one(shelves, {
-//     fields: [fanfics.shelve],
-//     references: [shelves.id],
-//   }),
-// }));
+export const fanficsRelations = relations(fanfics, ({ many }) => ({
+  progresses: many(progress),
+  chapters: many(chapters),
+}));
 
 export type Fanfic = typeof fanfics.$inferSelect;
+
+export const chapters = sqliteTable(
+  "chapter",
+  {
+    number: int("number", { mode: "number" }).primaryKey(),
+    fanficId: int("fanfic_id", { mode: "number" })
+      .notNull()
+      .references(() => fanfics.id, { onDelete: "cascade" }),
+    nbWords: integer("nb_words", { mode: "number" }).notNull(),
+  },
+  (table) => [
+    index("chapter_number_fanfic_id_idx").on(table.number, table.fanficId),
+  ],
+);
+
+export const chaptersRelations = relations(chapters, ({ one }) => ({
+  fanfic: one(fanfics),
+}));
+
+export type Chapter = typeof chapters.$inferSelect;
+
+export const progress = sqliteTable(
+  "progress",
+  {
+    fanficId: int("fanfic_id", { mode: "number" })
+      .notNull()
+      .references(() => fanfics.id, { onDelete: "cascade" }),
+    chapterNumber: integer("chapter_number").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+  },
+  (table) => [
+    index("progress_fanfic_id_idx").on(table.fanficId),
+    primaryKey({ columns: [table.chapterNumber, table.fanficId] }),
+  ],
+);
+
+export const progressRelations = relations(progress, ({ one }) => ({
+  fanfic: one(fanfics),
+}));
+
+export type Progress = typeof progress.$inferSelect;
+
+// ---------
 
 export const users = sqliteTable(
   "user",

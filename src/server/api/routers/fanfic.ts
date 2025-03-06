@@ -1,17 +1,36 @@
 import { TRPCError } from "@trpc/server";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { db, runTransaction } from "~/server/db";
-import { fanfics } from "~/server/db/schema";
+import { chapters, fanfics, progress } from "~/server/db/schema";
 import { extractFanficData } from "~/server/services/extractor";
 
 export const fanficRouter = createTRPCRouter({
   getAll: publicProcedure.query(async () => {
-    return db.query.fanfics.findMany({
-      orderBy: asc(fanfics.title),
-    });
+    return db
+      .select({
+        id: fanfics.id,
+        title: fanfics.title,
+        url: fanfics.url,
+        author: fanfics.author,
+        website: fanfics.website,
+        summary: fanfics.summary,
+        likesCount: fanfics.likesCount,
+        tags: fanfics.tags,
+        isCompleted: fanfics.isCompleted,
+        fandom: fanfics.fandom,
+        ships: fanfics.ships,
+        language: fanfics.language,
+        progress: sql<number>`COALESCE(MAX(${progress.chapterNumber}), 0)`,
+        chaptersCount: sql<number>`COALESCE(MAX(${chapters.number}), 0)`,
+      })
+      .from(fanfics)
+      .leftJoin(progress, eq(fanfics.id, progress.fanficId))
+      .leftJoin(chapters, eq(fanfics.id, chapters.fanficId))
+      .groupBy(fanfics.id)
+      .orderBy(asc(fanfics.title));
   }),
   extractData: publicProcedure
     .input(z.string())
@@ -25,11 +44,12 @@ export const fanficRouter = createTRPCRouter({
         website: z.string(),
         summary: z.string(),
         likesCount: z.number(),
-        tags: z.string(),
-        writingCompleted: z.boolean(),
-        fandom: z.string(),
-        ships: z.string(),
+        tags: z.array(z.string()),
+        isCompleted: z.boolean(),
+        fandom: z.array(z.string()),
+        ships: z.array(z.string()),
         language: z.string(),
+        chaptersCount: z.number(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -44,7 +64,7 @@ export const fanficRouter = createTRPCRouter({
             summary: input.summary,
             likesCount: input.likesCount,
             tags: input.tags,
-            writingCompleted: input.writingCompleted,
+            isCompleted: input.isCompleted,
             fandom: input.fandom,
             ships: input.ships,
             language: input.language,
@@ -59,14 +79,16 @@ export const fanficRouter = createTRPCRouter({
             message: "Error creating fanfic",
           });
         }
-        // await Promise.all(
-        //   input.payedBy.map(async (payedBy) => {
-        //     await db.insert(usersToFanfics).values({
-        //       userId: payedBy,
-        //       fanficId: fanfic.id,
-        //     });
-        //   }),
-        // );
+        await Promise.all(
+          Array.from({ length: input.chaptersCount }).map(async (_, i) => {
+            await db.insert(chapters).values({
+              number: i + 1,
+              fanficId: fanfic.id,
+              nbWords: 0,
+            });
+          }),
+        );
+        // TODO Update word count for each chapter
         return fanfic;
       });
 
@@ -84,10 +106,10 @@ export const fanficRouter = createTRPCRouter({
         website: z.string(),
         summary: z.string(),
         likesCount: z.number(),
-        tags: z.string(),
-        writingCompleted: z.boolean(),
-        fandom: z.string(),
-        ships: z.string(),
+        tags: z.array(z.string()),
+        isCompleted: z.boolean(),
+        fandom: z.array(z.string()),
+        ships: z.array(z.string()),
         language: z.string(),
       }),
     )
@@ -103,7 +125,7 @@ export const fanficRouter = createTRPCRouter({
             summary: input.summary,
             likesCount: input.likesCount,
             tags: input.tags,
-            writingCompleted: input.writingCompleted,
+            isCompleted: input.isCompleted,
             fandom: input.fandom,
             ships: input.ships,
             language: input.language,
@@ -121,17 +143,8 @@ export const fanficRouter = createTRPCRouter({
           });
         }
 
-        // await db
-        //   .delete(usersToFanfics)
-        //   .where(eq(usersToFanfics.fanficId, input.id));
-        // await Promise.all(
-        //   input.payedBy.map((payedBy) =>
-        //     db.insert(usersToFanfics).values({
-        //       userId: payedBy,
-        //       fanficId: fanfic.id,
-        //     }),
-        //   ),
-        // );
+        // TODO Handle chapters count update
+
         return fanfic;
       });
 

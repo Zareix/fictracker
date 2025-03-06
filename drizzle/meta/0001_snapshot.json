@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "13d321a2-eb03-4315-a680-6d9f5486326c",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "e5eff1b5-bbab-4914-98ab-681a02e77f7a",
+  "prevId": "13d321a2-eb03-4315-a680-6d9f5486326c",
   "tables": {
     "account": {
       "name": "account",
@@ -144,7 +144,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "chapter_number_fanfic_id_idx": {
+          "name": "chapter_number_fanfic_id_idx",
+          "columns": [
+            "number",
+            "fanfic_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "chapter_fanfic_id_fanfic_id_fk": {
           "name": "chapter_fanfic_id_fanfic_id_fk",

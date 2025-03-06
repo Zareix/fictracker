@@ -1,7 +1,11 @@
-import { DialogTitle } from "~/components/ui/dialog";
 import { EditCreateForm } from "~/components/fanfics/edit-create-form";
 import type { RouterOutputs } from "~/utils/api";
-import { Drawer, DrawerContent } from "~/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "~/components/ui/drawer";
 
 type Props = {
   fanfic: RouterOutputs["fanfic"]["getAll"][number];
@@ -12,8 +16,10 @@ type Props = {
 export const EditFanficDialog = ({ fanfic, isOpen, setIsOpen }: Props) => {
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTitle>Edit Fanfic</DialogTitle>
       <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Edit Fanfic</DrawerTitle>
+        </DrawerHeader>
         <EditCreateForm
           onFinished={() => {
             setIsOpen(false);

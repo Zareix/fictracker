@@ -1,4 +1,12 @@
-import { ChartColumnIcon, HomeIcon, PlusIcon, ShieldIcon } from "lucide-react";
+import {
+  BookCopyIcon,
+  BookMarkedIcon,
+  HomeIcon,
+  PlusCircleIcon,
+  PlusIcon,
+  ShieldIcon,
+  UserIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { CreateFanficDialog } from "~/components/fanfics/create";
@@ -14,12 +22,17 @@ export const NAV_ITEMS = [
   {
     title: "Shelves",
     url: "/shelves",
-    icon: ChartColumnIcon,
+    icon: BookMarkedIcon,
   },
   {
     title: "All fanfics",
     url: "/fanfics",
-    icon: ShieldIcon,
+    icon: BookCopyIcon,
+  },
+  {
+    title: "Profile",
+    url: "/profile",
+    icon: UserIcon,
   },
 ] as const;
 
@@ -66,7 +79,7 @@ export const Navbar = () => {
               variant="link"
               className="text-foreground flex h-full items-center gap-2"
             >
-              <PlusIcon />
+              <PlusCircleIcon size={26} />
             </Button>
           }
         />

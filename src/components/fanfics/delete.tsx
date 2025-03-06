@@ -1,7 +1,12 @@
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { DialogDescription, DialogFooter } from "~/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTitle } from "~/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "~/components/ui/drawer";
 import { api, type RouterOutputs } from "~/utils/api";
 
 export const DeleteDialog = ({
@@ -32,10 +37,12 @@ export const DeleteDialog = ({
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerContent>
-        <DrawerTitle>
-          Delete fanfic:{" "}
-          <span className="font-medium italic">{fanfic.title}</span>{" "}
-        </DrawerTitle>
+        <DrawerHeader>
+          <DrawerTitle>
+            Delete fanfic:{" "}
+            <span className="font-medium italic">{fanfic.title}</span>
+          </DrawerTitle>
+        </DrawerHeader>
         <DialogDescription>
           Are you sure you want to delete fanfic this fanfic?
         </DialogDescription>

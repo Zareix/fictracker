@@ -15,6 +15,13 @@ CREATE TABLE `account` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `chapter` (
+	`number` integer PRIMARY KEY NOT NULL,
+	`fanfic_id` integer NOT NULL,
+	`nb_words` integer NOT NULL,
+	FOREIGN KEY (`fanfic_id`) REFERENCES `fanfic`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `fanfic` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`title` text(256) NOT NULL,
@@ -23,10 +30,10 @@ CREATE TABLE `fanfic` (
 	`website` text(256) NOT NULL,
 	`summary` text(256) NOT NULL,
 	`likes_count` integer NOT NULL,
-	`tags` text(256) NOT NULL,
-	`writing_completed` integer NOT NULL,
-	`fandom` text(256) NOT NULL,
-	`ships` text(256) NOT NULL,
+	`tags` text DEFAULT '[]' NOT NULL,
+	`is_completed` integer NOT NULL,
+	`fandom` text DEFAULT '[]' NOT NULL,
+	`ships` text DEFAULT '[]' NOT NULL,
 	`language` text(256) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updatedAt` integer
@@ -47,6 +54,15 @@ CREATE TABLE `passkey` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `progress` (
+	`fanfic_id` integer NOT NULL,
+	`chapter_number` integer NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	PRIMARY KEY(`chapter_number`, `fanfic_id`),
+	FOREIGN KEY (`fanfic_id`) REFERENCES `fanfic`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE INDEX `progress_fanfic_id_idx` ON `progress` (`fanfic_id`);--> statement-breakpoint
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`expires_at` integer NOT NULL,

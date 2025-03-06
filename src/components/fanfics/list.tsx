@@ -1,6 +1,5 @@
 import React from "react";
-import { parseAsStringEnum, useQueryState } from "nuqs";
-import { type RouterOutputs } from "~/utils/api";
+import { api, type RouterOutputs } from "~/utils/api";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -9,20 +8,15 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import {
-  Calendar1Icon,
+  BookOpenCheckIcon,
   EditIcon,
   EllipsisVertical,
   InfoIcon,
-  RefreshCcwIcon,
-  TextIcon,
+  PlusIcon,
   TrashIcon,
-  UserIcon,
-  WalletCardsIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Card, CardContent } from "~/components/ui/card";
-import { currencyToSymbol, formatNextPaymentDate } from "~/lib/utils";
-import Image from "next/image";
 import { EditFanficDialog } from "~/components/fanfics/edit";
 import {
   Accordion,
@@ -30,9 +24,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
-import { CategoryIcon } from "~/components/fanfics/shelves/icon";
 import { DeleteDialog } from "~/components/fanfics/delete";
-import { Separator } from "~/components/ui/separator";
+import { toast } from "sonner";
 
 type Props = {
   fanfics: RouterOutputs["fanfic"]["getAll"];
@@ -53,10 +46,7 @@ export const FanficList = ({ fanfics }: Props) => {
   return (
     <Accordion type="single" collapsible>
       {fanfics.map((fanfic) => (
-        <React.Fragment key={fanfic.id}>
-          <FanficListItem key={fanfic.id} fanfic={fanfic} />
-          <Separator className="ml-auto w-[calc(100%-1rem-40px)] md:w-full" />
-        </React.Fragment>
+        <FanficListItem key={fanfic.id} fanfic={fanfic} />
       ))}
     </Accordion>
   );
@@ -71,10 +61,20 @@ const FanficListItem = ({
     delete: false,
     edit: false,
   });
+  const apiUtils = api.useUtils();
+  const incrementChapterMutation = api.progress.increment.useMutation({
+    onSuccess: () => {
+      apiUtils.fanfic.getAll.invalidate().catch(console.error);
+      toast.success("Chapter incremented!");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   if (fanfic.id === -1) {
     return (
-      <Card className="mt-3 border-none opacity-50 shadow-none">
+      <Card className="mt-3 opacity-50">
         <CardContent>
           <div className="flex items-center gap-2">
             <h2 className="grow text-xl font-semibold">{fanfic.title}</h2>
@@ -93,7 +93,7 @@ const FanficListItem = ({
   }
 
   return (
-    <Card className="border-none shadow-none">
+    <Card>
       <CardContent>
         <AccordionItem value={fanfic.id.toString()}>
           <AccordionTrigger asChild>
@@ -110,9 +110,15 @@ const FanficListItem = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="mr-2 w-32"
+                  className="mr-2"
                   onClick={(e) => e.stopPropagation()}
                 >
+                  <DropdownMenuItem
+                    onClick={() => incrementChapterMutation.mutate(fanfic.id)}
+                  >
+                    <PlusIcon />
+                    <span>Increment chapter</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setIsOpen({ ...isOpen, edit: true })}
                   >
@@ -136,11 +142,13 @@ const FanficListItem = ({
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <div
-              className="text-foreground/80 flex flex-wrap gap-x-4 gap-y-2 pt-1 pl-12 text-base
-                md:gap-x-6 md:pl-6"
-            >
-              TODO
+            <div className="text-foreground/80 flex flex-wrap gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
+              <div className="flex gap-1">
+                <BookOpenCheckIcon />
+                <span>
+                  {fanfic.progress}/{fanfic.chaptersCount}
+                </span>
+              </div>
             </div>
           </AccordionContent>
         </AccordionItem>

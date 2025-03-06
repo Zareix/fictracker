@@ -15,14 +15,14 @@ import { Input } from "~/components/ui/input";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { toast } from "sonner";
 import { preprocessStringToNumber } from "~/lib/utils";
-import { Checkbox } from "~/components/ui/checkbox";
+import { Textarea } from "~/components/ui/textarea";
+import { Switch } from "~/components/ui/switch";
 
 const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
   ({
     ...fanfic,
     id: -1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    progress: 0,
   }) satisfies RouterOutputs["fanfic"]["getAll"][number];
 
 const fanficCreateSchema = z.object({
@@ -32,18 +32,24 @@ const fanficCreateSchema = z.object({
   website: z.string(),
   summary: z.string(),
   likesCount: z.preprocess(preprocessStringToNumber, z.number()),
-  tags: z.string(),
-  writingCompleted: z.boolean(),
-  fandom: z.string(),
-  ships: z.string(),
+  tags: z.array(z.string()),
+  isCompleted: z.boolean(),
+  fandom: z.array(z.string()),
+  ships: z.array(z.string()),
   language: z.string(),
+  chaptersCount: z.preprocess(preprocessStringToNumber, z.number()),
 });
 
 export const EditCreateForm = ({
   fanfic,
   onFinished,
 }: {
-  fanfic?: RouterOutputs["fanfic"]["getAll"][number];
+  fanfic?: Omit<
+    RouterOutputs["fanfic"]["getAll"][number],
+    "id" | "createdAt" | "updatedAt" | "progress"
+  > & {
+    id?: number;
+  };
   onFinished?: () => void;
 }) => {
   const apiUtils = api.useUtils();
@@ -111,7 +117,7 @@ export const EditCreateForm = ({
             summary: newFanfic.summary,
             likesCount: newFanfic.likesCount,
             tags: newFanfic.tags,
-            writingCompleted: newFanfic.writingCompleted,
+            isCompleted: newFanfic.isCompleted,
             fandom: newFanfic.fandom,
             ships: newFanfic.ships,
             language: newFanfic.language,
@@ -141,16 +147,17 @@ export const EditCreateForm = ({
       website: fanfic?.website ?? "",
       summary: fanfic?.summary ?? "",
       likesCount: fanfic?.likesCount ?? 0,
-      tags: fanfic?.tags ?? "",
-      writingCompleted: fanfic?.writingCompleted ?? false,
-      fandom: fanfic?.fandom ?? "",
-      ships: fanfic?.ships ?? "",
+      tags: fanfic?.tags ?? [],
+      isCompleted: fanfic?.isCompleted ?? false,
+      fandom: fanfic?.fandom ?? [],
+      ships: fanfic?.ships ?? [],
       language: fanfic?.language ?? "",
+      chaptersCount: fanfic?.chaptersCount ?? 0,
     },
   });
 
   function onSubmit(values: z.infer<typeof fanficCreateSchema>) {
-    if (fanfic) {
+    if (fanfic?.id) {
       editFanficMutation.mutate({
         ...values,
         id: fanfic.id,
@@ -228,7 +235,7 @@ export const EditCreateForm = ({
                 <FormItem>
                   <FormLabel>Summary</FormLabel>
                   <FormControl>
-                    <Input placeholder="placeholder" {...field} />
+                    <Textarea placeholder="placeholder" rows={5} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -260,23 +267,41 @@ export const EditCreateForm = ({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="writingCompleted"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
+            <div className="flex gap-2">
+              <FormField
+                control={form.control}
+                name="chaptersCount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total chapters</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="placeholder"
+                        type="number"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isCompleted"
+                render={({ field }) => (
+                  <FormItem className="flex w-1/3 flex-col">
                     <FormLabel>Completed</FormLabel>
-                  </div>
-                </FormItem>
-              )}
-            />
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="my-0 mt-3"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="fandom"

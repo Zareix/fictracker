@@ -1,0 +1,1 @@
+CREATE INDEX `chapter_number_fanfic_id_idx` ON `chapter` (`number`,`fanfic_id`);
