@@ -98,40 +98,20 @@ import * as cheerio from "cheerio";
 //   };
 // };
 
-const getChaptersCount = async (
-  $: cheerio.CheerioAPI,
-): Promise<[number, boolean]> => {
-  const chaptersText = $("dd.chapters").text();
-  if (!chaptersText?.includes("/")) return [1, false];
-  const [publishedChapters, totalChapters] = chaptersText.split("/");
-  if (!publishedChapters || !totalChapters) return [1, false];
-
-  const chaptersCount = Number.parseInt(publishedChapters);
-  if (totalChapters === "?") return [chaptersCount, false];
-  return [chaptersCount, chaptersCount === Number.parseInt(totalChapters)];
-};
-
 export const extractFanficData: FanficExtractor = async (workUrl: string) => {
-  let url = workUrl.split("/chapters/")[0]!;
-  if (!url.includes("view_adult=true")) {
-    url += `?view_adult=true`;
-  }
+  const url =
+    workUrl.split("/chapters/")[0]! + "?view_adult=true&view_full_work=true";
   console.log("[a3o] Scrapping", url);
 
   console.log("[a3o] Fetching page content");
-  const pageContent = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:135.0) Gecko/20100101 Firefox/135.0",
-    },
-  }).then((r) => r.text());
+  const pageContent = await fetch(url).then((r) => r.text());
   console.log("[a3o] Parsing page content");
   const $ = cheerio.load(pageContent);
 
   console.log("[a3o] Extracting data");
   const title = $("h2.title.heading").text().trim();
   const author = $("h3.byline").text().trim();
-  const summary = $(".summary blockquote").text().trim();
+  const summary = $(".preface:not(.chapter) .summary blockquote").text().trim();
   const likesCount = $(".stats dd.kudos").text().trim();
   const language = $("dd.language").text().trim();
   const fandom = $("dd.fandom > ul > li")
@@ -143,9 +123,20 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
   const tags = $("dd.freeform.tags > ul > li")
     .map((i, el) => $(el).text().trim())
     .get();
-
-  // const chaptersCount = Number.parseInt($("dd.chapters").text().split("/")[0]);
-  // const isCompleted = Boolean($(".stats dd.chapters").text().includes("?"));
+  const isCompleted = !$("dd.chapters").text().includes("?");
+  const chapters = $("#chapters > .chapter [role=article]")
+    .map((i, el) => {
+      const $el = $(el);
+      return {
+        number: i + 1,
+        wordsCount: $el
+          .text()
+          .trim()
+          .split(/\s+/)
+          .filter((word) => word.length > 0).length,
+      };
+    })
+    .get();
 
   return {
     url,
@@ -155,10 +146,10 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
     summary: summary ?? "",
     likesCount: likesCount ? Number.parseInt(likesCount.replace(",", "")) : 0,
     tags,
-    isCompleted: false,
+    isCompleted,
     fandom,
     ships,
     language: language ?? "",
-    chaptersCount: 0,
+    chapters,
   };
 };

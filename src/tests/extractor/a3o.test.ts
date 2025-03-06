@@ -22,6 +22,14 @@ test(
 
     expect(fanficData.tags).toBeArrayOfSize(19);
     expect(fanficData.tags[0]).toBe("Marauders' Era");
+
+    expect(fanficData.isCompleted).toBe(true);
+    expect(fanficData.chapters).toBeArrayOfSize(188);
+    expect(fanficData.chapters[0]?.number).toBe(1);
+    expect(fanficData.chapters[0]?.wordsCount).toBe(1954);
+    expect(
+      fanficData.chapters.reduce((acc, curr) => acc + curr.wordsCount, 0),
+    ).toBe(520325);
   },
   60 * 1000,
 );

@@ -74,7 +74,7 @@ export const chapters = sqliteTable(
     fanficId: int("fanfic_id", { mode: "number" })
       .notNull()
       .references(() => fanfics.id, { onDelete: "cascade" }),
-    nbWords: integer("nb_words", { mode: "number" }).notNull(),
+    wordsCount: integer("words_count", { mode: "number" }).notNull(),
   },
   (table) => [
     index("chapter_number_fanfic_id_idx").on(table.number, table.fanficId),

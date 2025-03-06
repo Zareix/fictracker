@@ -5,7 +5,10 @@ export const extractFanficData = async (
   url: string,
 ): Promise<
   Omit<Fanfic, "id" | "createdAt" | "updatedAt"> & {
-    chaptersCount: number;
+    chapters: Array<{
+      number: number;
+      wordsCount: number;
+    }>;
   }
 > => {
   try {
@@ -28,7 +31,12 @@ export const extractFanficData = async (
     fandom: [],
     ships: [],
     language: "",
-    chaptersCount: 0,
+    chapters: [
+      {
+        number: 1,
+        wordsCount: 0,
+      },
+    ],
   };
 };
 

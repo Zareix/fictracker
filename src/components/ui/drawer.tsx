@@ -55,7 +55,7 @@ const DrawerContent = ({
       )}
       {...props}
     >
-      <div className="bg-muted mx-auto mt-4 h-2 w-[100px] rounded-full" />
+      <div className="bg-muted mx-auto mt-4 mb-2 h-2 w-[100px] rounded-full" />
       <div className="grid gap-4 overflow-y-auto p-4">{children}</div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
