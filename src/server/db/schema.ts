@@ -67,16 +67,44 @@ export const fanficsRelations = relations(fanfics, ({ many }) => ({
 
 export type Fanfic = typeof fanfics.$inferSelect;
 
+export const fanficsToShelves = sqliteTable(
+  "fanfics_to_shelves",
+  {
+    fanficId: integer("fanfic_id")
+      .notNull()
+      .references(() => fanfics.id),
+    shelfId: integer("shelf_id")
+      .notNull()
+      .references(() => shelves.id),
+  },
+  (t) => [primaryKey({ columns: [t.fanficId, t.shelfId] })],
+);
+
+export const fanficsToShelvesRelations = relations(
+  fanficsToShelves,
+  ({ one }) => ({
+    shelf: one(shelves, {
+      fields: [fanficsToShelves.shelfId],
+      references: [shelves.id],
+    }),
+    fanfic: one(fanfics, {
+      fields: [fanficsToShelves.fanficId],
+      references: [fanfics.id],
+    }),
+  }),
+);
+
 export const chapters = sqliteTable(
   "chapter",
   {
-    number: int("number", { mode: "number" }).primaryKey(),
+    number: int("number", { mode: "number" }),
     fanficId: int("fanfic_id", { mode: "number" })
       .notNull()
       .references(() => fanfics.id, { onDelete: "cascade" }),
     wordsCount: integer("words_count", { mode: "number" }).notNull(),
   },
   (table) => [
+    primaryKey({ columns: [table.number, table.fanficId] }),
     index("chapter_number_fanfic_id_idx").on(table.number, table.fanficId),
   ],
 );

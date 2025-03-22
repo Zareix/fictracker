@@ -3,8 +3,6 @@ import {
   BookMarkedIcon,
   HomeIcon,
   PlusCircleIcon,
-  PlusIcon,
-  ShieldIcon,
   UserIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -46,7 +44,12 @@ const NavbarItem = ({
     key={item.title}
     asChild
     variant="link"
-    className={cn(pathname === item.url ? "text-primary" : "text-foreground")}
+    className={cn(
+      (item.url === "/" && pathname === item.url) ||
+        (item.url !== "/" && pathname.startsWith(item.url))
+        ? "text-primary"
+        : "text-foreground",
+    )}
   >
     <Link
       href={item.url}

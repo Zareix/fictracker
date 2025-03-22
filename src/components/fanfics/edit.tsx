@@ -24,7 +24,16 @@ export const EditFanficDialog = ({ fanfic, isOpen, setIsOpen }: Props) => {
           onFinished={() => {
             setIsOpen(false);
           }}
-          fanfic={fanfic}
+          // TODO Get all chapters details
+          fanfic={{
+            ...fanfic,
+            chapters: Array.from({ length: fanfic.chaptersCount }).map(
+              (_, i) => ({
+                number: i + 1,
+                wordsCount: 0,
+              }),
+            ),
+          }}
         />
       </DrawerContent>
     </Drawer>

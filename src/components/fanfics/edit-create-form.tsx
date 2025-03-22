@@ -23,6 +23,7 @@ const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
     ...fanfic,
     id: -1,
     progress: 0,
+    chaptersCount: fanfic.chapters.length,
   }) satisfies RouterOutputs["fanfic"]["getAll"][number];
 
 const fanficCreateSchema = z.object({
@@ -37,17 +38,19 @@ const fanficCreateSchema = z.object({
   fandom: z.array(z.string()),
   ships: z.array(z.string()),
   language: z.string(),
-  chaptersCount: z.preprocess(preprocessStringToNumber, z.number()),
+  chapters: z.array(
+    z.object({
+      number: z.number(),
+      wordsCount: z.number(),
+    }),
+  ),
 });
 
 export const EditCreateForm = ({
   fanfic,
   onFinished,
 }: {
-  fanfic?: Omit<
-    RouterOutputs["fanfic"]["getAll"][number],
-    "id" | "createdAt" | "updatedAt" | "progress"
-  > & {
+  fanfic?: z.infer<typeof fanficCreateSchema> & {
     id?: number;
   };
   onFinished?: () => void;
@@ -152,7 +155,7 @@ export const EditCreateForm = ({
       fandom: fanfic?.fandom ?? [],
       ships: fanfic?.ships ?? [],
       language: fanfic?.language ?? "",
-      chaptersCount: fanfic?.chaptersCount ?? 0,
+      chapters: fanfic?.chapters ?? [],
     },
   });
 
@@ -268,23 +271,16 @@ export const EditCreateForm = ({
               )}
             />
             <div className="flex gap-2">
-              <FormField
-                control={form.control}
-                name="chaptersCount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total chapters</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="placeholder"
-                        type="number"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FormItem className="flex w-1/3 flex-col">
+                <FormLabel>Total chapters</FormLabel>
+                <FormControl>
+                  <Input
+                    value={fanfic?.chapters.length}
+                    type="number"
+                    disabled
+                  />
+                </FormControl>
+              </FormItem>
               <FormField
                 control={form.control}
                 name="isCompleted"

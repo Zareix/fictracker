@@ -49,7 +49,12 @@ export const fanficRouter = createTRPCRouter({
         fandom: z.array(z.string()),
         ships: z.array(z.string()),
         language: z.string(),
-        chaptersCount: z.number(),
+        chapters: z.array(
+          z.object({
+            number: z.number(),
+            wordsCount: z.number(),
+          }),
+        ),
       }),
     )
     .mutation(async ({ input }) => {
@@ -80,15 +85,13 @@ export const fanficRouter = createTRPCRouter({
           });
         }
         await Promise.all(
-          Array.from({ length: input.chaptersCount }).map(async (_, i) => {
+          input.chapters.map(async (chapter) => {
             await db.insert(chapters).values({
-              number: i + 1,
+              ...chapter,
               fanficId: fanfic.id,
-              nbWords: 0,
             });
           }),
         );
-        // TODO Update word count for each chapter
         return fanfic;
       });
 

@@ -7,10 +7,10 @@ import { Toaster } from "~/components/ui/sonner";
 import { TooltipProvider } from "~/components/ui/tooltip";
 // import { useEffect } from "react";
 // import { scan } from "react-scan";
-// import { env } from "~/env";
-// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import "~/styles/globals.css";
+import { env } from "~/env";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   // useEffect(() => {
@@ -39,7 +39,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
             </Layout>
           </div>
           <Toaster />
-          {/* {env.NEXT_PUBLIC_ENV === "development" && <ReactQueryDevtools />} */}
+          {env.NEXT_PUBLIC_ENV === "development" && <ReactQueryDevtools />}
         </TooltipProvider>
       </NuqsAdapter>
     </>

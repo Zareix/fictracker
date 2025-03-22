@@ -18,10 +18,7 @@ const CardHeader = ({ className, ...props }: React.ComponentProps<"div">) => (
 
 const CardTitle = ({ className, ...props }: React.ComponentProps<"div">) => (
   <div
-    className={cn(
-      "text-2xl leading-none font-semibold tracking-tight",
-      className,
-    )}
+    className={cn("text-xl leading-none font-medium tracking-tight", className)}
     {...props}
   />
 );
@@ -38,7 +35,7 @@ const CardContent = ({ className, ...props }: React.ComponentProps<"div">) => (
 );
 
 const CardFooter = ({ className, ...props }: React.ComponentProps<"div">) => (
-  <div className={cn("flex items-center p-6 pt-0", className)} {...props} />
+  <div className={cn("flex px-2 pt-0", className)} {...props} />
 );
 
 export {

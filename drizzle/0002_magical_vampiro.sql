@@ -1,0 +1,1 @@
+ALTER TABLE `chapter` RENAME COLUMN "nb_words" TO "words_count";

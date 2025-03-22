@@ -1,22 +1,78 @@
 import { TRPCError } from "@trpc/server";
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { preprocessStringToNumber } from "~/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { db, runTransaction } from "~/server/db";
-import { shelves, fanfics } from "~/server/db/schema";
+import { db } from "~/server/db";
+import {
+  chapters,
+  fanfics,
+  fanficsToShelves,
+  progress,
+  shelves,
+} from "~/server/db/schema";
 
 export const shelveRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.shelves.findMany({
-      columns: {
-        id: true,
-        name: true,
-        icon: true,
-      },
-      orderBy: [asc(shelves.name)],
-    });
+    return ctx.db
+      .select({
+        id: shelves.id,
+        name: shelves.name,
+        icon: shelves.icon,
+        fanficsCount: sql<number>`COUNT(${fanficsToShelves.fanficId})`,
+      })
+      .from(shelves)
+      .leftJoin(fanficsToShelves, eq(shelves.id, fanficsToShelves.shelfId))
+      .groupBy(shelves.id)
+      .orderBy(asc(shelves.name));
   }),
+  get: publicProcedure
+    .input(z.preprocess(preprocessStringToNumber, z.number()))
+    .query(async ({ ctx, input }) => {
+      const shelf = await ctx.db.query.shelves.findFirst({
+        where: (tb, { eq }) => eq(tb.id, input),
+        columns: {
+          id: true,
+          name: true,
+          icon: true,
+        },
+      });
+      if (!shelf) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error getting shelf",
+        });
+      }
+      const fanficInShelves = await ctx.db
+        .select({
+          id: fanfics.id,
+          title: fanfics.title,
+          url: fanfics.url,
+          author: fanfics.author,
+          website: fanfics.website,
+          summary: fanfics.summary,
+          likesCount: fanfics.likesCount,
+          tags: fanfics.tags,
+          isCompleted: fanfics.isCompleted,
+          fandom: fanfics.fandom,
+          ships: fanfics.ships,
+          language: fanfics.language,
+          progress: sql<number>`COALESCE(MAX(${progress.chapterNumber}), 0)`,
+          chaptersCount: sql<number>`COALESCE(MAX(${chapters.number}), 0)`,
+        })
+        .from(fanfics)
+        .innerJoin(fanficsToShelves, eq(fanfics.id, fanficsToShelves.fanficId))
+        .leftJoin(progress, eq(fanfics.id, progress.fanficId))
+        .leftJoin(chapters, eq(fanfics.id, chapters.fanficId))
+        .groupBy(fanfics.id)
+        .where(eq(fanficsToShelves.shelfId, input));
+
+      return {
+        ...shelf,
+        fanfics: fanficInShelves,
+      };
+    }),
   create: publicProcedure
     .input(z.object({ name: z.string(), icon: z.string() }))
     .mutation(async ({ ctx, input }) => {
@@ -88,19 +144,7 @@ export const shelveRouter = createTRPCRouter({
         message: "Error creating shelve",
       });
     }
-    await runTransaction(db, async () => {
-      // const subs = await db
-      //   .select()
-      //   .from(fanfics)
-      //   .where(eq(fanfics.shelve, input));
-      // for (const sub of subs) {
-      //   await db
-      //     .delete(usersToFanfics)
-      //     .where(eq(usersToFanfics.fanficId, sub.id));
-      //   await db.delete(fanfics).where(eq(fanfics.id, sub.id));
-      // }
-      await db.delete(shelves).where(eq(shelves.id, input));
-    });
+    await db.delete(shelves).where(eq(shelves.id, input));
     return {
       id: shelve.id,
       name: shelve.name,
