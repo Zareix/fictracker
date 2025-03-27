@@ -63,6 +63,7 @@ export const fanfics = sqliteTable(
 export const fanficsRelations = relations(fanfics, ({ many }) => ({
   progresses: many(progress),
   chapters: many(chapters),
+  shelves: many(shelves),
 }));
 
 export type Fanfic = typeof fanfics.$inferSelect;
@@ -101,7 +102,9 @@ export const chapters = sqliteTable(
     fanficId: int("fanfic_id", { mode: "number" })
       .notNull()
       .references(() => fanfics.id, { onDelete: "cascade" }),
-    wordsCount: integer("words_count", { mode: "number" }).notNull(),
+    wordsCount: integer("words_count", { mode: "number" }).notNull().default(0),
+    url: text("url", { length: 256 }).notNull().default(""),
+    title: text("title", { length: 256 }).notNull().default(""),
   },
   (table) => [
     primaryKey({ columns: [table.number, table.fanficId] }),

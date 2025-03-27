@@ -1,4 +1,4 @@
-import { eq, max, sql } from "drizzle-orm";
+import { eq, max } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";

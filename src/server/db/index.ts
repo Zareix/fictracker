@@ -21,6 +21,8 @@ client.exec("PRAGMA foreign_keys = ON;");
 
 export const db = drizzle(client, { schema });
 
+export type DB = typeof db;
+
 export const runTransaction = async <T>(
   database: typeof db,
   callback: () => Promise<T>,

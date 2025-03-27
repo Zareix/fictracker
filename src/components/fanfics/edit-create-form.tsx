@@ -24,6 +24,8 @@ const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
     id: -1,
     progress: 0,
     chaptersCount: fanfic.chapters.length,
+    lastChapterUrl: "#",
+    shelves: [],
   }) satisfies RouterOutputs["fanfic"]["getAll"][number];
 
 const fanficCreateSchema = z.object({
@@ -42,6 +44,8 @@ const fanficCreateSchema = z.object({
     z.object({
       number: z.number(),
       wordsCount: z.number(),
+      url: z.string(),
+      title: z.string(),
     }),
   ),
 });

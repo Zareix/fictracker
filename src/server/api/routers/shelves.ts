@@ -4,14 +4,8 @@ import { z } from "zod";
 import { preprocessStringToNumber } from "~/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { db } from "~/server/db";
-import {
-  chapters,
-  fanfics,
-  fanficsToShelves,
-  progress,
-  shelves,
-} from "~/server/db/schema";
+import { fanficsToShelves, shelves } from "~/server/db/schema";
+import { getAllFanfics } from "~/server/services/fanfic";
 
 export const shelveRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
@@ -44,33 +38,10 @@ export const shelveRouter = createTRPCRouter({
           message: "Error getting shelf",
         });
       }
-      const fanficInShelves = await ctx.db
-        .select({
-          id: fanfics.id,
-          title: fanfics.title,
-          url: fanfics.url,
-          author: fanfics.author,
-          website: fanfics.website,
-          summary: fanfics.summary,
-          likesCount: fanfics.likesCount,
-          tags: fanfics.tags,
-          isCompleted: fanfics.isCompleted,
-          fandom: fanfics.fandom,
-          ships: fanfics.ships,
-          language: fanfics.language,
-          progress: sql<number>`COALESCE(MAX(${progress.chapterNumber}), 0)`,
-          chaptersCount: sql<number>`COALESCE(MAX(${chapters.number}), 0)`,
-        })
-        .from(fanfics)
-        .innerJoin(fanficsToShelves, eq(fanfics.id, fanficsToShelves.fanficId))
-        .leftJoin(progress, eq(fanfics.id, progress.fanficId))
-        .leftJoin(chapters, eq(fanfics.id, chapters.fanficId))
-        .groupBy(fanfics.id)
-        .where(eq(fanficsToShelves.shelfId, input));
 
       return {
         ...shelf,
-        fanfics: fanficInShelves,
+        fanfics: await getAllFanfics(ctx.db, input),
       };
     }),
   create: publicProcedure
@@ -144,11 +115,30 @@ export const shelveRouter = createTRPCRouter({
         message: "Error creating shelve",
       });
     }
-    await db.delete(shelves).where(eq(shelves.id, input));
+    await ctx.db.delete(shelves).where(eq(shelves.id, input));
     return {
       id: shelve.id,
       name: shelve.name,
       icon: shelve.icon,
     };
   }),
+  toggleFanfic: publicProcedure
+    .input(z.object({ fanficId: z.number(), shelfId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const isInShelf = await ctx.db.query.fanficsToShelves.findFirst({
+        where: (tb, { eq, and }) =>
+          and(eq(tb.fanficId, input.fanficId), eq(tb.shelfId, input.shelfId)),
+      });
+      if (!isInShelf) {
+        await ctx.db.insert(fanficsToShelves).values({
+          fanficId: input.fanficId,
+          shelfId: input.shelfId,
+        });
+        return "added";
+      }
+      await ctx.db
+        .delete(fanficsToShelves)
+        .where(eq(fanficsToShelves.fanficId, input.fanficId));
+      return "removed";
+    }),
 });

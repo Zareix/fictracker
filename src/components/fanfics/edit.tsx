@@ -31,6 +31,8 @@ export const EditFanficDialog = ({ fanfic, isOpen, setIsOpen }: Props) => {
               (_, i) => ({
                 number: i + 1,
                 wordsCount: 0,
+                url: "",
+                title: "",
               }),
             ),
           }}

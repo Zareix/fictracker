@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "13d321a2-eb03-4315-a680-6d9f5486326c",
+  "id": "3641266e-ce08-4f99-87d3-b639c5cdcc5e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -125,8 +125,8 @@
         "number": {
           "name": "number",
           "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "fanfic_id": {
@@ -136,15 +136,41 @@
           "notNull": true,
           "autoincrement": false
         },
-        "nb_words": {
-          "name": "nb_words",
+        "words_count": {
+          "name": "words_count",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 0
+        },
+        "url": {
+          "name": "url",
+          "type": "text(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "title": {
+          "name": "title",
+          "type": "text(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "chapter_number_fanfic_id_idx": {
+          "name": "chapter_number_fanfic_id_idx",
+          "columns": [
+            "number",
+            "fanfic_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "chapter_fanfic_id_fanfic_id_fk": {
           "name": "chapter_fanfic_id_fanfic_id_fk",
@@ -160,7 +186,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "chapter_number_fanfic_id_pk": {
+          "columns": [
+            "number",
+            "fanfic_id"
+          ],
+          "name": "chapter_number_fanfic_id_pk"
+        }
+      },
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -281,6 +315,65 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "fanfics_to_shelves": {
+      "name": "fanfics_to_shelves",
+      "columns": {
+        "fanfic_id": {
+          "name": "fanfic_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "shelf_id": {
+          "name": "shelf_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fanfics_to_shelves_fanfic_id_fanfic_id_fk": {
+          "name": "fanfics_to_shelves_fanfic_id_fanfic_id_fk",
+          "tableFrom": "fanfics_to_shelves",
+          "tableTo": "fanfic",
+          "columnsFrom": [
+            "fanfic_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fanfics_to_shelves_shelf_id_shelve_id_fk": {
+          "name": "fanfics_to_shelves_shelf_id_shelve_id_fk",
+          "tableFrom": "fanfics_to_shelves",
+          "tableTo": "shelve",
+          "columnsFrom": [
+            "shelf_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "fanfics_to_shelves_fanfic_id_shelf_id_pk": {
+          "columns": [
+            "fanfic_id",
+            "shelf_id"
+          ],
+          "name": "fanfics_to_shelves_fanfic_id_shelf_id_pk"
+        }
+      },
       "uniqueConstraints": {},
       "checkConstraints": {}
     },

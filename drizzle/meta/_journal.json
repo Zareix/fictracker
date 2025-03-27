@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1741296489474,
-      "tag": "0000_aromatic_midnight",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1741298751515,
-      "tag": "0001_certain_sinister_six",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1742677224172,
-      "tag": "0002_magical_vampiro",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1742677413507,
-      "tag": "0003_acoustic_gorilla_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1742678973674,
-      "tag": "0004_windy_songbird",
+      "when": 1743114320135,
+      "tag": "0000_orange_captain_america",
       "breakpoints": true
     }
   ]

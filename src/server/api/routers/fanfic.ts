@@ -1,36 +1,16 @@
 import { TRPCError } from "@trpc/server";
-import { asc, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { db, runTransaction } from "~/server/db";
-import { chapters, fanfics, progress } from "~/server/db/schema";
+import { runTransaction } from "~/server/db";
+import { chapters, fanfics } from "~/server/db/schema";
 import { extractFanficData } from "~/server/services/extractor";
+import { getAllFanfics } from "~/server/services/fanfic";
 
 export const fanficRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async () => {
-    return db
-      .select({
-        id: fanfics.id,
-        title: fanfics.title,
-        url: fanfics.url,
-        author: fanfics.author,
-        website: fanfics.website,
-        summary: fanfics.summary,
-        likesCount: fanfics.likesCount,
-        tags: fanfics.tags,
-        isCompleted: fanfics.isCompleted,
-        fandom: fanfics.fandom,
-        ships: fanfics.ships,
-        language: fanfics.language,
-        progress: sql<number>`COALESCE(MAX(${progress.chapterNumber}), 0)`,
-        chaptersCount: sql<number>`COALESCE(MAX(${chapters.number}), 0)`,
-      })
-      .from(fanfics)
-      .leftJoin(progress, eq(fanfics.id, progress.fanficId))
-      .leftJoin(chapters, eq(fanfics.id, chapters.fanficId))
-      .groupBy(fanfics.id)
-      .orderBy(asc(fanfics.title));
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    return getAllFanfics(ctx.db);
   }),
   extractData: publicProcedure
     .input(z.string())
@@ -53,13 +33,15 @@ export const fanficRouter = createTRPCRouter({
           z.object({
             number: z.number(),
             wordsCount: z.number(),
+            url: z.string().default(""),
+            title: z.string().default(""),
           }),
         ),
       }),
     )
-    .mutation(async ({ input }) => {
-      const fanfic = await runTransaction(db, async () => {
-        const fanficsReturned = await db
+    .mutation(async ({ ctx, input }) => {
+      const fanfic = await runTransaction(ctx.db, async () => {
+        const fanficsReturned = await ctx.db
           .insert(fanfics)
           .values({
             title: input.title,
@@ -86,9 +68,11 @@ export const fanficRouter = createTRPCRouter({
         }
         await Promise.all(
           input.chapters.map(async (chapter) => {
-            await db.insert(chapters).values({
+            await ctx.db.insert(chapters).values({
               ...chapter,
               fanficId: fanfic.id,
+              url: chapter.url,
+              title: chapter.title,
             });
           }),
         );
@@ -116,9 +100,9 @@ export const fanficRouter = createTRPCRouter({
         language: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      const fanfic = await runTransaction(db, async () => {
-        const fanficsReturned = await db
+    .mutation(async ({ ctx, input }) => {
+      const fanfic = await runTransaction(ctx.db, async () => {
+        const fanficsReturned = await ctx.db
           .update(fanfics)
           .set({
             title: input.title,
@@ -155,10 +139,10 @@ export const fanficRouter = createTRPCRouter({
         id: fanfic.id,
       };
     }),
-  delete: publicProcedure.input(z.number()).mutation(async ({ input }) => {
-    await runTransaction(db, async () => {
+  delete: publicProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
+    await runTransaction(ctx.db, async () => {
       // await db.delete(usersToFanfics).where(eq(usersToFanfics.fanficId, input));
-      await db.delete(fanfics).where(eq(fanfics.id, input));
+      await ctx.db.delete(fanfics).where(eq(fanfics.id, input));
     });
   }),
 });

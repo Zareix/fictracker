@@ -2,8 +2,8 @@ import type { FanficExtractor } from ".";
 import * as cheerio from "cheerio";
 
 export const extractFanficData: FanficExtractor = async (workUrl: string) => {
-  const url =
-    workUrl.split("/chapters/")[0]! + "?view_adult=true&view_full_work=true";
+  const baseUrl = workUrl.split("/chapters/")[0]!.split("?")[0];
+  const url = baseUrl + "?view_adult=true&view_full_work=true";
   console.log("[a3o] Scrapping", url);
 
   console.log("[a3o] Fetching page content");
@@ -27,16 +27,26 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
     .map((i, el) => $(el).text().trim())
     .get();
   const isCompleted = !$("dd.chapters").text().includes("?");
-  const chapters = $("#chapters > .chapter [role=article]")
+  const chapters = $("#chapters > .chapter ")
     .map((i, el) => {
       const $el = $(el);
       return {
         number: i + 1,
         wordsCount: $el
+          .find("[role=article]")
           .text()
           .trim()
           .split(/\s+/)
           .filter((word) => word.length > 0).length,
+        title: $el
+          .find("h3.title")
+          .text()
+          .trim()
+          .split(/: (.+)?/, 2)
+          .at(-1)!
+          .trim(),
+        url:
+          "https://archiveofourown.org" + $el.find("h3.title a").attr("href")!,
       };
     })
     .get();

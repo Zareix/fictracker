@@ -1,5 +1,5 @@
 import Link from "next/link";
-import CreateShelveDialog from "~/components/fanfics/shelves/create";
+import CreateShelveDialog from "~/components/shelves/create";
 import { Card, CardDescription, CardTitle } from "~/components/ui/card";
 import { api } from "~/utils/api";
 

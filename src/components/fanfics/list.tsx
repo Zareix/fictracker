@@ -4,10 +4,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import {
+  BookMarkedIcon,
   BookOpenCheckIcon,
+  CheckIcon,
   EditIcon,
   ExternalLinkIcon,
   PlusIcon,
@@ -19,6 +25,7 @@ import { EditFanficDialog } from "~/components/fanfics/edit";
 import { DeleteDialog } from "~/components/fanfics/delete";
 import { toast } from "sonner";
 import Link from "next/link";
+import { type Shelve } from "~/server/db/schema";
 
 type FanficItem = RouterOutputs["fanfic"]["getAll"][number];
 
@@ -27,6 +34,7 @@ type Props = {
 };
 
 export const FanficList = ({ fanfics }: Props) => {
+  const shelvesQuery = api.shelve.getAll.useQuery();
   // const [sort] = useQueryState(
   //   "sort",
   //   parseAsStringEnum(SORTS.map((s) => s.key)),
@@ -41,13 +49,23 @@ export const FanficList = ({ fanfics }: Props) => {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {fanfics.map((fanfic) => (
-        <FanficListItem key={fanfic.id} fanfic={fanfic} />
+        <FanficListItem
+          key={fanfic.id}
+          fanfic={fanfic}
+          shelves={shelvesQuery.data ?? []}
+        />
       ))}
     </div>
   );
 };
 
-const FanficListItem = ({ fanfic }: { fanfic: FanficItem }) => {
+const FanficListItem = ({
+  fanfic,
+  shelves,
+}: {
+  fanfic: FanficItem;
+  shelves: Array<Pick<Shelve, "id" | "name">>;
+}) => {
   const [isOpen, setIsOpen] = useState({
     delete: false,
     edit: false,
@@ -63,6 +81,25 @@ const FanficListItem = ({ fanfic }: { fanfic: FanficItem }) => {
       toast.error(err.message);
     },
   });
+  const toggleFanficInShelfMutation = api.shelve.toggleFanfic.useMutation({
+    onSuccess: (data) => {
+      apiUtils.fanfic.getAll.invalidate().catch(console.error);
+      apiUtils.shelve.get.invalidate().catch(console.error);
+      apiUtils.shelve.getAll.invalidate().catch(console.error);
+      if (data === "added") {
+        toast.success("Fanfic added to shelf!");
+      } else {
+        toast.success("Fanfic removed from shelf!");
+      }
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  const addToShelf = (shelfId: number) => {
+    toggleFanficInShelfMutation.mutate({ fanficId: fanfic.id, shelfId });
+  };
 
   if (fanfic.id === -1) {
     return (
@@ -102,11 +139,8 @@ const FanficListItem = ({ fanfic }: { fanfic: FanficItem }) => {
             </CardFooter>
           </Card>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="mr-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Link href={fanfic.url} target="_blank">
+        <DropdownMenuContent align="start">
+          <Link href={fanfic.lastChapterUrl ?? fanfic.url} target="_blank">
             <DropdownMenuItem>
               <ExternalLinkIcon />
               <span>Read</span>
@@ -124,6 +158,32 @@ const FanficListItem = ({ fanfic }: { fanfic: FanficItem }) => {
             <EditIcon />
             <span>Edit</span>
           </DropdownMenuItem>
+          {shelves.length > 0 && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <BookMarkedIcon />
+                <span>
+                  In {fanfic.shelves.length} shel
+                  {fanfic.shelves.length > 1 ? "ves" : "f"}
+                </span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {shelves.map((shelf) => (
+                    <DropdownMenuItem
+                      key={shelf.id}
+                      onClick={() => addToShelf(shelf.id)}
+                    >
+                      {fanfic.shelves.includes(shelf.id) && (
+                        <CheckIcon className="h-4 w-4" />
+                      )}
+                      <span>{shelf.name}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
           <DropdownMenuItem
             className="text-destructive"
             onClick={() =>

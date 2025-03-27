@@ -16,12 +16,16 @@ CREATE TABLE `account` (
 );
 --> statement-breakpoint
 CREATE TABLE `chapter` (
-	`number` integer PRIMARY KEY NOT NULL,
+	`number` integer,
 	`fanfic_id` integer NOT NULL,
-	`nb_words` integer NOT NULL,
+	`words_count` integer DEFAULT 0 NOT NULL,
+	`url` text(256) DEFAULT '' NOT NULL,
+	`title` text(256) DEFAULT '' NOT NULL,
+	PRIMARY KEY(`number`, `fanfic_id`),
 	FOREIGN KEY (`fanfic_id`) REFERENCES `fanfic`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `chapter_number_fanfic_id_idx` ON `chapter` (`number`,`fanfic_id`);--> statement-breakpoint
 CREATE TABLE `fanfic` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`title` text(256) NOT NULL,
@@ -40,6 +44,14 @@ CREATE TABLE `fanfic` (
 );
 --> statement-breakpoint
 CREATE INDEX `fanfic_title_idx` ON `fanfic` (`title`);--> statement-breakpoint
+CREATE TABLE `fanfics_to_shelves` (
+	`fanfic_id` integer NOT NULL,
+	`shelf_id` integer NOT NULL,
+	PRIMARY KEY(`fanfic_id`, `shelf_id`),
+	FOREIGN KEY (`fanfic_id`) REFERENCES `fanfic`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`shelf_id`) REFERENCES `shelve`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `passkey` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text,

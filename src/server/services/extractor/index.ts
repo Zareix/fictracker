@@ -8,6 +8,8 @@ export const extractFanficData = async (
     chapters: Array<{
       number: number;
       wordsCount: number;
+      url: string;
+      title: string;
     }>;
   }
 > => {
@@ -35,6 +37,8 @@ export const extractFanficData = async (
       {
         number: 1,
         wordsCount: 0,
+        url: "",
+        title: "",
       },
     ],
   };

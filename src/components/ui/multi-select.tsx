@@ -197,7 +197,7 @@ export const MultiSelect = ({
         <Button
           {...props}
           onClick={handleTogglePopover}
-          variant="outline-t"
+          variant="outline"
           className={cn(
             `border-input hover:border-input flex h-auto min-h-10 w-full items-center
             justify-between rounded-md border bg-inherit p-1 shadow-none hover:bg-inherit
