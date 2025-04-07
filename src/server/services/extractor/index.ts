@@ -44,4 +44,26 @@ export const extractFanficData = async (
   };
 };
 
+export const extractFanficChapters = async (
+  url: string,
+): Promise<
+  Array<{
+    number: number;
+    wordsCount: number;
+    url: string;
+    title: string;
+  }>
+> => {
+  try {
+    if (url.startsWith("https://archiveofourown.org/")) {
+      return await a3o.extractFanficChapters(url);
+    }
+    console.log("No extractor found for", url);
+  } catch (e) {
+    console.error(e);
+  }
+  return [];
+};
+
 export type FanficExtractor = typeof extractFanficData;
+export type FanficExtractorChapters = typeof extractFanficChapters;

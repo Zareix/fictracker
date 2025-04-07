@@ -1,4 +1,4 @@
-import { eq, max } from "drizzle-orm";
+import { and, eq, max } from "drizzle-orm";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
@@ -16,5 +16,21 @@ export const progressRouter = createTRPCRouter({
       fanficId: input,
       chapterNumber: (lastReadChapter[0]?.chapterNumber ?? 0) + 1,
     });
+  }),
+  decrement: publicProcedure.input(z.number()).mutation(async ({ input }) => {
+    const lastReadChapter = await db
+      .select({
+        chapterNumber: max(progress.chapterNumber),
+      })
+      .from(progress)
+      .where(eq(progress.fanficId, input));
+    await db
+      .delete(progress)
+      .where(
+        and(
+          eq(progress.fanficId, input),
+          eq(progress.chapterNumber, lastReadChapter[0]?.chapterNumber ?? 0),
+        ),
+      );
   }),
 });

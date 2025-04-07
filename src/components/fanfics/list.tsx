@@ -16,6 +16,7 @@ import {
   CheckIcon,
   EditIcon,
   ExternalLinkIcon,
+  MinusIcon,
   PlusIcon,
   TrashIcon,
 } from "lucide-react";
@@ -81,6 +82,16 @@ const FanficListItem = ({
       toast.error(err.message);
     },
   });
+  const decrementChapterMutation = api.progress.decrement.useMutation({
+    onSuccess: () => {
+      apiUtils.fanfic.getAll.invalidate().catch(console.error);
+      apiUtils.shelve.get.invalidate().catch(console.error);
+      toast.success("Chapter incremented!");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
   const toggleFanficInShelfMutation = api.shelve.toggleFanfic.useMutation({
     onSuccess: (data) => {
       apiUtils.fanfic.getAll.invalidate().catch(console.error);
@@ -107,11 +118,9 @@ const FanficListItem = ({
         <CardContent>
           <h2 className="text-center text-xl font-semibold">{fanfic.title}</h2>
           <div className="text-foreground/80 flex flex-wrap gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               <BookOpenCheckIcon />
-              <span>
-                {fanfic.progress}/{fanfic.chaptersCount}
-              </span>
+              <span>TBR</span>
             </div>
           </div>
         </CardContent>
@@ -130,10 +139,14 @@ const FanficListItem = ({
               </h2>
             </CardContent>
             <CardFooter className="text-foreground/80 flex flex-wrap gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
-              <div className="flex gap-1">
+              <div className="flex gap-2">
                 <BookOpenCheckIcon />
                 <span>
-                  {fanfic.progress}/{fanfic.chaptersCount}
+                  {progressToStatus(
+                    fanfic.isCompleted,
+                    fanfic.progress,
+                    fanfic.chaptersCount,
+                  )}
                 </span>
               </div>
             </CardFooter>
@@ -146,12 +159,30 @@ const FanficListItem = ({
               <span>Read</span>
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuItem
-            onClick={() => incrementChapterMutation.mutate(fanfic.id)}
-          >
-            <PlusIcon />
-            <span>Increment chapter</span>
-          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <BookOpenCheckIcon />
+              <span>
+                {fanfic.progress}/{fanfic.chaptersCount}
+              </span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem
+                  onClick={() => incrementChapterMutation.mutate(fanfic.id)}
+                >
+                  <PlusIcon />
+                  <span>Increment chapter</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => decrementChapterMutation.mutate(fanfic.id)}
+                >
+                  <MinusIcon />
+                  <span>Decrement chapter</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
           <DropdownMenuItem
             onClick={() => setIsOpen({ ...isOpen, edit: true })}
           >
@@ -169,17 +200,19 @@ const FanficListItem = ({
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuSubContent>
-                  {shelves.map((shelf) => (
-                    <DropdownMenuItem
-                      key={shelf.id}
-                      onClick={() => addToShelf(shelf.id)}
-                    >
-                      {fanfic.shelves.includes(shelf.id) && (
-                        <CheckIcon className="h-4 w-4" />
-                      )}
-                      <span>{shelf.name}</span>
-                    </DropdownMenuItem>
-                  ))}
+                  {shelves
+                    .filter((shelf) => shelf.id > 0)
+                    .map((shelf) => (
+                      <DropdownMenuItem
+                        key={shelf.id}
+                        onClick={() => addToShelf(shelf.id)}
+                      >
+                        {fanfic.shelves.includes(shelf.id) && (
+                          <CheckIcon className="h-4 w-4" />
+                        )}
+                        <span>{shelf.name}</span>
+                      </DropdownMenuItem>
+                    ))}
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
@@ -210,4 +243,22 @@ const FanficListItem = ({
       />
     </>
   );
+};
+
+const progressToStatus = (
+  isCompleted: boolean,
+  progress: number,
+  chaptersCount: number,
+) => {
+  // TBR / Reading / Waiting Next Chapters / Read
+  if (isCompleted && progress === chaptersCount) {
+    return "Read";
+  }
+  if (!isCompleted && progress === chaptersCount) {
+    return "Waiting Next Chapters";
+  }
+  if (progress === 0) {
+    return "TBR";
+  }
+  return "Reading";
 };

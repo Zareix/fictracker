@@ -14,9 +14,10 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { toast } from "sonner";
-import { preprocessStringToNumber } from "~/lib/utils";
+import { cn, preprocessStringToNumber } from "~/lib/utils";
 import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
+import { RefreshCwIcon } from "lucide-react";
 
 const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
   ({
@@ -141,6 +142,15 @@ export const EditCreateForm = ({
     },
     onSettled: () => {
       apiUtils.fanfic.getAll.invalidate().catch(console.error);
+    },
+  });
+  const extractFanficChaptersMutation = api.fanfic.extractChapters.useMutation({
+    onSuccess: (chapters) => {
+      if (chapters.length === 0) return;
+      form.setValue("chapters", chapters);
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
   const shelvesQuery = api.shelve.getAll.useQuery();
@@ -275,6 +285,23 @@ export const EditCreateForm = ({
               )}
             />
             <div className="flex gap-2">
+              <Button
+                onClick={() =>
+                  fanfic?.url
+                    ? extractFanficChaptersMutation.mutate(fanfic?.url)
+                    : null
+                }
+                disabled={!fanfic?.url}
+                variant="ghost"
+                className="h-full"
+                type="button"
+              >
+                <RefreshCwIcon
+                  className={cn(
+                    extractFanficChaptersMutation.isPending && "animate-spin",
+                  )}
+                />
+              </Button>
               <FormItem className="flex w-1/3 flex-col">
                 <FormLabel>Total chapters</FormLabel>
                 <FormControl>

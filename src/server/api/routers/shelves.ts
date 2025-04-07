@@ -1,15 +1,21 @@
 import { TRPCError } from "@trpc/server";
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { preprocessStringToNumber } from "~/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { fanficsToShelves, shelves } from "~/server/db/schema";
+import {
+  chapters,
+  fanfics,
+  fanficsToShelves,
+  progress,
+  shelves,
+} from "~/server/db/schema";
 import { getAllFanfics } from "~/server/services/fanfic";
 
 export const shelveRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
-    return ctx.db
+    const allShelves = await ctx.db
       .select({
         id: shelves.id,
         name: shelves.name,
@@ -20,10 +26,45 @@ export const shelveRouter = createTRPCRouter({
       .leftJoin(fanficsToShelves, eq(shelves.id, fanficsToShelves.shelfId))
       .groupBy(shelves.id)
       .orderBy(asc(shelves.name));
+
+    const inProgressShelf = {
+      id: -1,
+      name: "In progress",
+      icon: "",
+      fanficsCount: (
+        await ctx.db
+          .select({
+            fanficId: fanfics.id,
+            progress: sql<number>`COALESCE(MAX(${progress.chapterNumber}), 0)`,
+            chaptersCount: sql<number>`COALESCE(MAX(${chapters.number}), 0)`,
+          })
+          .from(fanfics)
+          .leftJoin(progress, eq(fanfics.id, progress.fanficId))
+          .leftJoin(chapters, eq(fanfics.id, chapters.fanficId))
+          .leftJoin(fanficsToShelves, eq(fanfics.id, fanficsToShelves.fanficId))
+          .groupBy(fanfics.id)
+      ).filter(
+        (fanfic) =>
+          fanfic.progress > 0 && fanfic.progress < fanfic.chaptersCount,
+      ).length,
+    };
+
+    return [inProgressShelf, ...allShelves];
   }),
   get: publicProcedure
     .input(z.preprocess(preprocessStringToNumber, z.number()))
     .query(async ({ ctx, input }) => {
+      if (input === -1) {
+        return {
+          id: -1,
+          name: "In progress",
+          icon: "",
+          fanfics: (await getAllFanfics(ctx.db)).filter(
+            (fanfic) =>
+              fanfic.progress > 0 && fanfic.progress < fanfic.chaptersCount,
+          ),
+        };
+      }
       const shelf = await ctx.db.query.shelves.findFirst({
         where: (tb, { eq }) => eq(tb.id, input),
         columns: {

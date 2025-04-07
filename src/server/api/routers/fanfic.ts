@@ -5,7 +5,10 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { runTransaction } from "~/server/db";
 import { chapters, fanfics } from "~/server/db/schema";
-import { extractFanficData } from "~/server/services/extractor";
+import {
+  extractFanficChapters,
+  extractFanficData,
+} from "~/server/services/extractor";
 import { getAllFanfics } from "~/server/services/fanfic";
 
 export const fanficRouter = createTRPCRouter({
@@ -15,6 +18,9 @@ export const fanficRouter = createTRPCRouter({
   extractData: publicProcedure
     .input(z.string())
     .mutation(async ({ input }) => extractFanficData(input)),
+  extractChapters: publicProcedure
+    .input(z.string())
+    .mutation(async ({ input }) => extractFanficChapters(input)),
   create: publicProcedure
     .input(
       z.object({
