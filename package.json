@@ -76,7 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "drizzle-kit": "^0.30.6",
-    "eslint": "^8.57.1",
+    "eslint": "^9.0.0",
     "eslint-config-next": "^15.2.4",
     "eslint-plugin-drizzle": "^0.2.3",
     "postcss": "^8.5.3",
