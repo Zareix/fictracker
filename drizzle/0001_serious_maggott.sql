@@ -1,0 +1,1 @@
+ALTER TABLE `fanfic` ADD `grade` integer;

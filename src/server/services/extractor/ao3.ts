@@ -4,14 +4,14 @@ import * as cheerio from "cheerio";
 export const extractFanficData: FanficExtractor = async (workUrl: string) => {
   const baseUrl = workUrl.split("/chapters/")[0]!.split("?")[0];
   const url = baseUrl + "?view_adult=true&view_full_work=true";
-  console.log("[a3o] Scrapping", url);
+  console.log("[ao3] Scrapping", url);
 
-  console.log("[a3o] Fetching page content");
+  console.log("[ao3] Fetching page content");
   const pageContent = await fetch(url).then((r) => r.text());
-  console.log("[a3o] Parsing page content");
+  console.log("[ao3] Parsing page content");
   const $ = cheerio.load(pageContent);
 
-  console.log("[a3o] Extracting data");
+  console.log("[ao3] Extracting data");
   const title = $("h2.title.heading").text().trim();
   const author = $("h3.byline").text().trim();
   const summary = $(".preface:not(.chapter) .summary blockquote").text().trim();
@@ -63,6 +63,7 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
     fandom,
     ships,
     language: language ?? "",
+    grade: null,
     chapters,
   };
 };
@@ -72,14 +73,14 @@ export const extractFanficChapters: FanficExtractorChapters = async (
 ) => {
   const baseUrl = workUrl.split("/chapters/")[0]!.split("?")[0];
   const url = baseUrl + "?view_adult=true&view_full_work=true";
-  console.log("[a3o] Scrapping", url);
+  console.log("[ao3] Scrapping", url);
 
-  console.log("[a3o] Fetching page content");
+  console.log("[ao3] Fetching page content");
   const pageContent = await fetch(url).then((r) => r.text());
-  console.log("[a3o] Parsing page content");
+  console.log("[ao3] Parsing page content");
   const $ = cheerio.load(pageContent);
 
-  console.log("[a3o] Extracting data");
+  console.log("[ao3] Extracting data");
   const chapters = $("#chapters > .chapter ")
     .map((i, el) => {
       const $el = $(el);

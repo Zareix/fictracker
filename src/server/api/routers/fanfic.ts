@@ -104,6 +104,7 @@ export const fanficRouter = createTRPCRouter({
         fandom: z.array(z.string()),
         ships: z.array(z.string()),
         language: z.string(),
+        grade: z.number().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -122,6 +123,7 @@ export const fanficRouter = createTRPCRouter({
             fandom: input.fandom,
             ships: input.ships,
             language: input.language,
+            grade: input.grade,
           })
           .where(eq(fanfics.id, input.id))
           .returning({
@@ -137,6 +139,55 @@ export const fanficRouter = createTRPCRouter({
         }
 
         // TODO Handle chapters count update
+
+        return fanfic;
+      });
+
+      return {
+        id: fanfic.id,
+      };
+    }),
+  updateGrade: publicProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        grade: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const fanfic = await runTransaction(ctx.db, async () => {
+        const [currentFanfic] = await ctx.db
+          .select({
+            id: fanfics.id,
+            grade: fanfics.grade,
+          })
+          .from(fanfics)
+          .where(eq(fanfics.id, input.id));
+
+        if (!currentFanfic) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error updating fanfic grade",
+          });
+        }
+
+        const fanficsReturned = await ctx.db
+          .update(fanfics)
+          .set({
+            grade: input.grade === currentFanfic.grade ? null : input.grade,
+          })
+          .where(eq(fanfics.id, input.id))
+          .returning({
+            id: fanfics.id,
+          });
+
+        const fanfic = fanficsReturned[0];
+        if (!fanfic) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error creating fanfic",
+          });
+        }
 
         return fanfic;
       });

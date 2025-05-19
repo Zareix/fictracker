@@ -49,6 +49,7 @@ export const fanfics = sqliteTable(
       .$type<string[]>()
       .default(sql`'[]'`),
     language: text("language", { length: 256 }).notNull(),
+    grade: int("grade", { mode: "number" }),
 
     createdAt: int("created_at", { mode: "timestamp" })
       .default(sql`(unixepoch())`)

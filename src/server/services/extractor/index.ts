@@ -1,5 +1,5 @@
 import type { Fanfic } from "~/server/db/schema";
-import * as a3o from "./a3o";
+import * as ao3 from "./ao3";
 
 export const extractFanficData = async (
   url: string,
@@ -15,7 +15,7 @@ export const extractFanficData = async (
 > => {
   try {
     if (url.startsWith("https://archiveofourown.org/")) {
-      return await a3o.extractFanficData(url);
+      return await ao3.extractFanficData(url);
     }
     console.log("No extractor found for", url);
   } catch (e) {
@@ -33,6 +33,7 @@ export const extractFanficData = async (
     fandom: [],
     ships: [],
     language: "",
+    grade: null,
     chapters: [
       {
         number: 1,
@@ -56,7 +57,7 @@ export const extractFanficChapters = async (
 > => {
   try {
     if (url.startsWith("https://archiveofourown.org/")) {
-      return await a3o.extractFanficChapters(url);
+      return await ao3.extractFanficChapters(url);
     }
     console.log("No extractor found for", url);
   } catch (e) {

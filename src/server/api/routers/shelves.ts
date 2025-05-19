@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { asc, eq, gt, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { preprocessStringToNumber } from "~/lib/utils";
 

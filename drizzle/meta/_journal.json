@@ -8,6 +8,13 @@
       "when": 1743114320135,
       "tag": "0000_orange_captain_america",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1747683984060,
+      "tag": "0001_serious_maggott",
+      "breakpoints": true
     }
   ]
 }

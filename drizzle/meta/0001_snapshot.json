@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "3641266e-ce08-4f99-87d3-b639c5cdcc5e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "d9ae4883-aa20-4bb9-a5ef-43f65bc9c1cf",
+  "prevId": "3641266e-ce08-4f99-87d3-b639c5cdcc5e",
   "tables": {
     "account": {
       "name": "account",
@@ -272,6 +272,13 @@
           "type": "text(256)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "grade": {
+          "name": "grade",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {

@@ -1,5 +1,5 @@
 import { and, asc, eq, sql } from "drizzle-orm";
-import { type DB } from "~/server/db";
+import type { DB } from "~/server/db";
 import {
   chapters,
   fanfics,
@@ -24,6 +24,7 @@ export const getAllFanfics = async (db: DB, shelfId?: number) => {
       language: fanfics.language,
       progress: sql<number>`COALESCE(MAX(${progress.chapterNumber}), 0)`,
       chaptersCount: sql<number>`COALESCE(MAX(${chapters.number}), 0)`,
+      grade: fanfics.grade,
     })
     .from(fanfics)
     .leftJoin(progress, eq(fanfics.id, progress.fanficId))
