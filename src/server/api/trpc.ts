@@ -10,7 +10,7 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { ZodError } from "zod/v4";
 // import { UserRoles } from "~/lib/constant";
 import { auth, type Session } from "~/server/auth";
 import { db } from "~/server/db";

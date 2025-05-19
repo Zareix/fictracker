@@ -7,9 +7,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/components/ui/drawer";
-import { z } from "zod";
+import { z } from "zod/v4-mini";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { toast } from "sonner";
 import { api } from "~/utils/api";
 import {
@@ -25,7 +25,7 @@ import { Button } from "~/components/ui/button";
 import { EditCreateForm } from "~/components/fanfics/edit-create-form";
 
 const fanficExtractSchema = z.object({
-  url: z.string().url(),
+  url: z.url(),
 });
 
 export const CreateFanficDialog = ({
@@ -41,7 +41,7 @@ export const CreateFanficDialog = ({
   });
 
   const form = useForm<z.infer<typeof fanficExtractSchema>>({
-    resolver: zodResolver(fanficExtractSchema),
+    resolver: standardSchemaResolver(fanficExtractSchema),
   });
 
   function onSubmit(values: z.infer<typeof fanficExtractSchema>) {

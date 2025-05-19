@@ -1,9 +1,10 @@
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
-import { DialogDescription, DialogFooter } from "~/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "~/components/ui/drawer";
@@ -43,10 +44,10 @@ export const DeleteDialog = ({
             <span className="font-medium italic">{fanfic.title}</span>
           </DrawerTitle>
         </DrawerHeader>
-        <DialogDescription>
+        <DrawerDescription>
           Are you sure you want to delete fanfic this fanfic?
-        </DialogDescription>
-        <DialogFooter>
+        </DrawerDescription>
+        <DrawerFooter>
           <Button
             variant="secondary"
             onClick={() => setIsOpen(false)}
@@ -61,7 +62,7 @@ export const DeleteDialog = ({
           >
             Delete
           </Button>
-        </DialogFooter>
+        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { asc, eq, sql } from "drizzle-orm";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { preprocessStringToNumber } from "~/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";

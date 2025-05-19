@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { z } from "zod/v4-mini";
 import { DialogFooter } from "~/components/ui/dialog";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import {
   Form,
   FormControl,
@@ -14,7 +14,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api, type RouterInputs, type RouterOutputs } from "~/utils/api";
 import { toast } from "sonner";
-import { cn, preprocessStringToNumber } from "~/lib/utils";
+import { cn } from "~/lib/utils";
 import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
 import { RefreshCwIcon } from "lucide-react";
@@ -27,15 +27,16 @@ const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
     chaptersCount: fanfic.chapters.length,
     lastChapterUrl: "#",
     shelves: [],
+    grade: null,
   }) satisfies RouterOutputs["fanfic"]["getAll"][number];
 
 const fanficCreateSchema = z.object({
   title: z.string(),
-  url: z.string().url(),
+  url: z.url(),
   author: z.string(),
   website: z.string(),
   summary: z.string(),
-  likesCount: z.preprocess(preprocessStringToNumber, z.number()),
+  likesCount: z.transform((val) => Number(val)),
   tags: z.array(z.string()),
   isCompleted: z.boolean(),
   fandom: z.array(z.string()),
@@ -156,7 +157,7 @@ export const EditCreateForm = ({
   const shelvesQuery = api.shelve.getAll.useQuery();
 
   const form = useForm<z.infer<typeof fanficCreateSchema>>({
-    resolver: zodResolver(fanficCreateSchema),
+    resolver: standardSchemaResolver(fanficCreateSchema),
     defaultValues: {
       title: fanfic?.title ?? "",
       url: fanfic?.url ?? "",

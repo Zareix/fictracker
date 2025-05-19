@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { runTransaction } from "~/server/db";

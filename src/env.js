@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { z } from "zod/v4-mini";
 
 export const env = createEnv({
   /**
@@ -10,12 +10,13 @@ export const env = createEnv({
     BETTER_AUTH_SECRET:
       process.env.NODE_ENV === "production"
         ? z.string()
-        : z.string().optional(),
-    BETTER_AUTH_URL: z.string().url(),
+        : z.optional(z.string()),
+    BETTER_AUTH_URL: z.url(),
     DATABASE_PATH: z.string(),
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+    NODE_ENV: z._default(
+      z.enum(["development", "test", "production"]),
+      "development",
+    ),
   },
 
   /**
@@ -24,9 +25,10 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+    NEXT_PUBLIC_ENV: z._default(
+      z.enum(["development", "test", "production"]),
+      "development",
+    ),
     // NEXT_PUBLIC_AUTH_URL: z.string().url(),
   },
 
