@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import type { Shelve } from "~/server/db/schema";
 import { cn } from "~/lib/utils";
+import { Badge } from "~/components/ui/badge";
 
 type FanficItem = RouterOutputs["fanfic"]["getAll"][number];
 
@@ -76,6 +77,16 @@ const FanficListItem = ({
     edit: false,
   });
   const apiUtils = api.useUtils();
+  const markAsReadMutation = api.progress.markAsRead.useMutation({
+    onSuccess: () => {
+      apiUtils.fanfic.getAll.invalidate().catch(console.error);
+      apiUtils.shelve.get.invalidate().catch(console.error);
+      toast.success("Fanfic marked as read!");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
   const incrementChapterMutation = api.progress.increment.useMutation({
     onSuccess: () => {
       apiUtils.fanfic.getAll.invalidate().catch(console.error);
@@ -147,6 +158,9 @@ const FanficListItem = ({
     );
   }
 
+  const firstFandom = fanfic.fandom[0];
+  const firstShip = fanfic.ships[0];
+
   return (
     <>
       <DropdownMenu>
@@ -156,11 +170,12 @@ const FanficListItem = ({
               <h2 className="text-xl font-semibold md:text-center">
                 {fanfic.title}
               </h2>
+              <div className="flex flex-wrap items-center gap-1">
+                {firstFandom && <Badge variant="default">{firstFandom}</Badge>}
+                {firstShip && <Badge variant="secondary">{firstShip}</Badge>}
+              </div>
             </CardContent>
-            <CardFooter
-              className="text-foreground/80 flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-base
-                md:gap-x-6"
-            >
+            <CardFooter className="text-foreground/80 flex items-center gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
               <div className="flex gap-2">
                 {progressToStatus(
                   fanfic.isCompleted,
@@ -177,6 +192,9 @@ const FanficListItem = ({
                     ))}
                 </div>
               )}
+              <div className="ml-auto">
+                {fanfic.progress}/{fanfic.chaptersCount}
+              </div>
             </CardFooter>
           </Card>
         </DropdownMenuTrigger>
@@ -203,12 +221,20 @@ const FanficListItem = ({
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
                 {fanfic.progress < fanfic.chaptersCount && (
-                  <DropdownMenuItem
-                    onClick={() => incrementChapterMutation.mutate(fanfic.id)}
-                  >
-                    <PlusIcon />
-                    <span>Increment chapter</span>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => markAsReadMutation.mutate(fanfic.id)}
+                    >
+                      <BookOpenCheckIcon />
+                      <span>Mark as read</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => incrementChapterMutation.mutate(fanfic.id)}
+                    >
+                      <PlusIcon />
+                      <span>Increment chapter</span>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 {fanfic.progress > 0 && (
                   <DropdownMenuItem

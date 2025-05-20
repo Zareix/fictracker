@@ -9,6 +9,7 @@
 
 import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { formatDate } from "date-fns";
 import superjson from "superjson";
 import { ZodError } from "zod/v4";
 // import { UserRoles } from "~/lib/constant";
@@ -114,7 +115,7 @@ export const createTRPCRouter = t.router;
  * network latency that would occur in production but not in local development.
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
-  const start = Date.now();
+  const start = new Date();
 
   if (t._config.isDev) {
     // artificial delay in dev
@@ -124,8 +125,13 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
   const result = await next();
 
-  const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  const end = new Date();
+  console.log(
+    `[TRPC] ${formatDate(
+      start,
+      "yyyy-MM-dd HH:mm:ss",
+    )} | ${path} (${end.getTime() - start.getTime()}ms)`,
+  );
 
   return result;
 });
