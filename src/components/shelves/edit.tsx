@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -8,20 +8,27 @@ import {
 } from "~/components/ui/drawer";
 import { Button } from "~/components/ui/button";
 import { EditCreateShelfDialog } from "~/components/shelves/edit-create-form";
+import { EditIcon } from "lucide-react";
 
-export const CreateShelfDialog = () => {
+export const EditShelfDialog = ({
+  shelf,
+}: {
+  shelf: NonNullable<ComponentProps<typeof EditCreateShelfDialog>["shelf"]>;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button>Create shelf</Button>
+        <Button size="icon">
+          <EditIcon size={20} />
+        </Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Create a new shelf</DrawerTitle>
+          <DrawerTitle>Edit shelf</DrawerTitle>
         </DrawerHeader>
-        <EditCreateShelfDialog setIsOpen={setIsOpen} />
+        <EditCreateShelfDialog setIsOpen={setIsOpen} shelf={shelf} />
       </DrawerContent>
     </Drawer>
   );

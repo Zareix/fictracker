@@ -5,6 +5,7 @@ import {
   LetterTextIcon,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Loading } from "~/components/ui/loading";
 import { Separator } from "~/components/ui/separator";
 import { api, type RouterOutputs } from "~/utils/api";
 
@@ -17,9 +18,7 @@ const Home = () => {
         <h1 className="text-3xl font-bold">Dashboard</h1>
       </header>
       {statsQuery.isLoading ? (
-        <div className="flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-white" />
-        </div>
+        <Loading />
       ) : statsQuery.isError || !statsQuery.data ? (
         <div>Error: {statsQuery.error?.message}</div>
       ) : (

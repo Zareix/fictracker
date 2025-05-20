@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 import { preprocessStringToNumber } from "~/lib/utils";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { runTransaction } from "~/server/db";
 import {
   chapters,
   fanfics,
@@ -113,7 +114,13 @@ export const shelveRouter = createTRPCRouter({
       };
     }),
   edit: publicProcedure
-    .input(z.object({ id: z.number(), name: z.string(), icon: z.string() }))
+    .input(
+      z.object({
+        id: z.number().positive(),
+        name: z.string(),
+        icon: z.string(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const shelvesReturned = await ctx.db
         .update(shelves)
@@ -156,7 +163,12 @@ export const shelveRouter = createTRPCRouter({
         message: "Error creating shelve",
       });
     }
-    await ctx.db.delete(shelves).where(eq(shelves.id, input));
+    await runTransaction(ctx.db, async () => {
+      await ctx.db
+        .delete(fanficsToShelves)
+        .where(eq(fanficsToShelves.shelfId, input));
+      await ctx.db.delete(shelves).where(eq(shelves.id, input));
+    });
     return {
       id: shelve.id,
       name: shelve.name,
