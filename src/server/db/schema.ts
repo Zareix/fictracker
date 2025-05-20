@@ -35,6 +35,7 @@ export const fanfics = sqliteTable(
     website: text("website", { length: 256 }).notNull(),
     summary: text("summary", { length: 256 }).notNull(),
     likesCount: int("likes_count", { mode: "number" }).notNull(),
+    rating: text("rating", { length: 256 }),
     tags: text("tags", { mode: "json" })
       .notNull()
       .$type<string[]>()

@@ -8,6 +8,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { FanficSkeleton } from "~/components/fanfics/skeleton";
 import { EditShelfDialog } from "~/components/shelves/edit";
 import { DeleteShelfDialog } from "~/components/shelves/delete";
+import { FiltersButton } from "~/components/filters";
 
 const Shelf = () => {
   const router = useRouter();
@@ -53,12 +54,15 @@ const Shelf = () => {
         </Button>
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{shelf.name}</h1>
-          {shelf.id > 0 && (
-            <div className="ml-auto flex gap-2">
-              <EditShelfDialog shelf={shelf} />
-              <DeleteShelfDialog shelf={shelf} />
-            </div>
-          )}
+          <div className="ml-auto flex gap-2">
+            <FiltersButton />
+            {shelf.id > 0 && (
+              <>
+                <EditShelfDialog shelf={shelf} />
+                <DeleteShelfDialog shelf={shelf} />
+              </>
+            )}
+          </div>
         </div>
       </header>
       <div className="mt-2">

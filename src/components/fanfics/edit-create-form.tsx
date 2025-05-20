@@ -18,6 +18,14 @@ import { cn } from "~/lib/utils";
 import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
 import { RefreshCwIcon } from "lucide-react";
+import { Ratings } from "~/lib/constant";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
   ({
@@ -28,6 +36,7 @@ const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
     lastChapterUrl: "#",
     shelves: [],
     grade: null,
+    rating: null,
   }) satisfies RouterOutputs["fanfic"]["getAll"][number];
 
 const fanficCreateSchema = z.object({
@@ -38,6 +47,7 @@ const fanficCreateSchema = z.object({
   summary: z.string(),
   likesCount: z.transform((val) => Number(val)),
   tags: z.array(z.string()),
+  rating: z.optional(z.enum(Ratings)),
   isCompleted: z.boolean(),
   fandom: z.array(z.string()),
   ships: z.array(z.string()),
@@ -169,6 +179,7 @@ export const EditCreateForm = ({
       isCompleted: fanfic?.isCompleted ?? false,
       fandom: fanfic?.fandom ?? [],
       ships: fanfic?.ships ?? [],
+      rating: fanfic?.rating ?? undefined,
       language: fanfic?.language ?? "",
       chapters: fanfic?.chapters ?? [],
     },
@@ -228,6 +239,35 @@ export const EditCreateForm = ({
                   <FormLabel>Author</FormLabel>
                   <FormControl>
                     <Input placeholder="placeholder" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rating</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Ratings.map((r) => (
+                          <SelectItem value={r} key={r}>
+                            {r}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

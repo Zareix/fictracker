@@ -18,6 +18,7 @@ export const getAllFanfics = async (db: DB, shelfId?: number) => {
       summary: fanfics.summary,
       likesCount: fanfics.likesCount,
       tags: fanfics.tags,
+      rating: fanfics.rating,
       isCompleted: fanfics.isCompleted,
       fandom: fanfics.fandom,
       ships: fanfics.ships,

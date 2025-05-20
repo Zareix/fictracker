@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod/v4";
+import { Ratings } from "~/lib/constant";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { runTransaction } from "~/server/db";
@@ -25,7 +26,7 @@ export const fanficRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string(),
-        url: z.string().url(),
+        url: z.url(),
         author: z.string(),
         website: z.string(),
         summary: z.string(),
@@ -34,6 +35,7 @@ export const fanficRouter = createTRPCRouter({
         isCompleted: z.boolean(),
         fandom: z.array(z.string()),
         ships: z.array(z.string()),
+        rating: z.string().optional(),
         language: z.string(),
         chapters: z.array(
           z.object({
@@ -56,6 +58,7 @@ export const fanficRouter = createTRPCRouter({
             website: input.website,
             summary: input.summary,
             likesCount: input.likesCount,
+            rating: input.rating,
             tags: input.tags,
             isCompleted: input.isCompleted,
             fandom: input.fandom,
@@ -94,9 +97,10 @@ export const fanficRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         title: z.string(),
-        url: z.string().url(),
+        url: z.url(),
         author: z.string(),
         website: z.string(),
+        rating: z.enum(Ratings).optional(),
         summary: z.string(),
         likesCount: z.number(),
         tags: z.array(z.string()),
@@ -119,6 +123,7 @@ export const fanficRouter = createTRPCRouter({
             summary: input.summary,
             likesCount: input.likesCount,
             tags: input.tags,
+            rating: input.rating,
             isCompleted: input.isCompleted,
             fandom: input.fandom,
             ships: input.ships,

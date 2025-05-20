@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { api, type RouterOutputs } from "~/utils/api";
 import {
   DropdownMenu,
@@ -32,6 +32,7 @@ import Link from "next/link";
 import type { Shelve } from "~/server/db/schema";
 import { cn } from "~/lib/utils";
 import { Badge } from "~/components/ui/badge";
+import { useFilters } from "~/lib/hooks/use-filters";
 
 type FanficItem = RouterOutputs["fanfic"]["getAll"][number];
 
@@ -40,13 +41,41 @@ type Props = {
 };
 
 export const FanficList = ({ fanfics }: Props) => {
+  const [filters] = useFilters();
   const shelvesQuery = api.shelve.getAll.useQuery();
-  // const [sort] = useQueryState(
-  //   "sort",
-  //   parseAsStringEnum(SORTS.map((s) => s.key)),
-  // );
 
-  if (fanfics.length === 0) {
+  const filteredFanfics = useMemo(() => {
+    let res = fanfics;
+    if (filters.fandom) {
+      res = res.filter((f) => f.fandom.includes(filters.fandom ?? ""));
+    }
+    if (filters.rating) {
+      res = res.filter((f) => f.rating === filters.rating);
+    }
+    if (filters.ships && filters.ships.length > 0) {
+      res = res.filter((f) =>
+        f.ships.some((ship) => filters.ships?.includes(ship)),
+      );
+    }
+    if (filters.tags && filters.tags.length > 0) {
+      res = res.filter((f) =>
+        f.tags.some((tag) => filters.tags?.includes(tag)),
+      );
+    }
+    if (filters.language) {
+      res = res.filter((f) => f.language === filters.language);
+    }
+    return res;
+  }, [
+    fanfics,
+    filters.fandom,
+    filters.rating,
+    filters.ships,
+    filters.tags,
+    filters.language,
+  ]);
+
+  if (filteredFanfics.length === 0) {
     return (
       <div className="text-muted-foreground text-center">No fanfics found</div>
     );
@@ -54,7 +83,7 @@ export const FanficList = ({ fanfics }: Props) => {
 
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      {fanfics.map((fanfic) => (
+      {filteredFanfics.map((fanfic) => (
         <FanficListItem
           key={fanfic.id}
           fanfic={fanfic}
@@ -167,9 +196,12 @@ const FanficListItem = ({
         <DropdownMenuTrigger asChild>
           <Card>
             <CardContent>
-              <h2 className="text-xl font-semibold md:text-center">
-                {fanfic.title}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-semibold md:text-center">
+                  {fanfic.title}
+                </h2>
+                <Rating rating={fanfic.rating} />
+              </div>
               <div className="flex flex-wrap items-center gap-1">
                 {firstFandom && <Badge variant="default">{firstFandom}</Badge>}
                 {firstShip && <Badge variant="secondary">{firstShip}</Badge>}
@@ -177,11 +209,11 @@ const FanficListItem = ({
             </CardContent>
             <CardFooter className="text-foreground/80 flex items-center gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
               <div className="flex gap-2">
-                {progressToStatus(
-                  fanfic.isCompleted,
-                  fanfic.progress,
-                  fanfic.chaptersCount,
-                )}
+                <ProgressToStatus
+                  isCompleted={fanfic.isCompleted}
+                  progress={fanfic.progress}
+                  chaptersCount={fanfic.chaptersCount}
+                />
               </div>
               {fanfic.grade && (
                 <div className="flex gap-2">
@@ -333,11 +365,15 @@ const FanficListItem = ({
   );
 };
 
-const progressToStatus = (
-  isCompleted: boolean,
-  progress: number,
-  chaptersCount: number,
-) => {
+const ProgressToStatus = ({
+  isCompleted,
+  progress,
+  chaptersCount,
+}: {
+  isCompleted: boolean;
+  progress: number;
+  chaptersCount: number;
+}) => {
   if (isCompleted && progress === chaptersCount) {
     return (
       <>
@@ -368,4 +404,29 @@ const progressToStatus = (
       <span>Reading</span>
     </>
   );
+};
+
+const Rating = ({ rating }: { rating: FanficItem["rating"] }) => {
+  switch (rating) {
+    case "K":
+      return (
+        <Badge className="ml-auto flex h-6 w-6 items-center justify-center bg-green-800 p-0">
+          {rating}
+        </Badge>
+      );
+    case "T":
+      return (
+        <Badge className="ml-auto flex h-6 w-6 items-center justify-center bg-amber-500 p-0">
+          {rating}
+        </Badge>
+      );
+    case "M":
+      return (
+        <Badge className="ml-auto flex h-6 w-6 items-center justify-center bg-red-700 p-0">
+          {rating}
+        </Badge>
+      );
+    default:
+      return <></>;
+  }
 };

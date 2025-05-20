@@ -1,0 +1,1 @@
+ALTER TABLE `fanfic` ADD `rating` text(256);

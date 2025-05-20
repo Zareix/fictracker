@@ -16,6 +16,7 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
   const author = $("h3.byline").text().trim();
   const summary = $(".preface:not(.chapter) .summary blockquote").text().trim();
   const likesCount = $(".stats dd.kudos").text().trim();
+  const rating = $("dd.rating").text().trim();
   const language = $("dd.language").text().trim();
   const fandom = $("dd.fandom > ul > li")
     .map((i, el) => $(el).text().trim())
@@ -59,13 +60,27 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
     summary: summary ?? "",
     likesCount: likesCount ? Number.parseInt(likesCount.replace(",", "")) : 0,
     tags,
+    rating: parseRating(rating),
     isCompleted,
     fandom,
     ships,
     language: language ?? "",
-    grade: null,
     chapters,
   };
+};
+
+const parseRating = (rating: string) => {
+  switch (rating) {
+    case "General Audiences":
+      return "K";
+    case "Teen And Up Audiences":
+      return "T";
+    case "Mature":
+    case "Explicit":
+      return "M";
+    default:
+      return null;
+  }
 };
 
 export const extractFanficChapters: FanficExtractorChapters = async (

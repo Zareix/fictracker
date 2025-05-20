@@ -15,6 +15,13 @@
       "when": 1747683984060,
       "tag": "0001_serious_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1747763688987,
+      "tag": "0002_outstanding_the_liberteens",
+      "breakpoints": true
     }
   ]
 }
