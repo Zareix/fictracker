@@ -47,7 +47,7 @@ const fanficCreateSchema = z.object({
   summary: z.string(),
   likesCount: z.transform((val) => Number(val)),
   tags: z.array(z.string()),
-  rating: z.optional(z.enum(Ratings)),
+  rating: z.nullish(z.enum(Ratings)),
   isCompleted: z.boolean(),
   fandom: z.array(z.string()),
   ships: z.array(z.string()),
@@ -253,7 +253,7 @@ export const EditCreateForm = ({
                   <FormControl>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      defaultValue={field.value ?? undefined}
                     >
                       <FormControl>
                         <SelectTrigger>

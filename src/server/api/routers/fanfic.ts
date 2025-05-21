@@ -35,7 +35,7 @@ export const fanficRouter = createTRPCRouter({
         isCompleted: z.boolean(),
         fandom: z.array(z.string()),
         ships: z.array(z.string()),
-        rating: z.string().optional(),
+        rating: z.enum(Ratings).nullish(),
         language: z.string(),
         chapters: z.array(
           z.object({
@@ -100,7 +100,7 @@ export const fanficRouter = createTRPCRouter({
         url: z.url(),
         author: z.string(),
         website: z.string(),
-        rating: z.enum(Ratings).optional(),
+        rating: z.enum(Ratings).nullish(),
         summary: z.string(),
         likesCount: z.number(),
         tags: z.array(z.string()),
