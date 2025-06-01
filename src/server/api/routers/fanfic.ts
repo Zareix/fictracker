@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod/v4";
 import { Ratings } from "~/lib/constant";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { runTransaction } from "~/server/db";
-import { chapters, fanfics } from "~/server/db/schema";
+import { chapters, fanfics, fanficsToShelves } from "~/server/db/schema";
 import {
   extractFanficChapters,
   extractFanficData,
@@ -45,6 +45,7 @@ export const fanficRouter = createTRPCRouter({
             title: z.string().default(""),
           }),
         ),
+        shelves: z.array(z.number()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -85,6 +86,30 @@ export const fanficRouter = createTRPCRouter({
             });
           }),
         );
+
+        await Promise.all(
+          input.shelves.map(async (shelfId) => {
+            const shelfRelation = await ctx.db
+              .select()
+              .from(fanficsToShelves)
+              .where(
+                and(
+                  eq(fanficsToShelves.shelfId, shelfId),
+                  eq(fanficsToShelves.fanficId, fanfic.id),
+                ),
+              )
+              .limit(1);
+
+            if (shelfRelation.length > 0) {
+              return;
+            }
+            await ctx.db.insert(fanficsToShelves).values({
+              fanficId: fanfic.id,
+              shelfId,
+            });
+          }),
+        );
+
         return fanfic;
       });
 
@@ -109,6 +134,15 @@ export const fanficRouter = createTRPCRouter({
         ships: z.array(z.string()),
         language: z.string(),
         grade: z.number().optional(),
+        shelves: z.array(z.number()),
+        chapters: z.array(
+          z.object({
+            number: z.number(),
+            wordsCount: z.number(),
+            url: z.string().default(""),
+            title: z.string().default(""),
+          }),
+        ),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -143,7 +177,43 @@ export const fanficRouter = createTRPCRouter({
           });
         }
 
-        // TODO Handle chapters count update
+        await ctx.db.delete(chapters).where(eq(chapters.fanficId, fanfic.id));
+        await Promise.all(
+          input.chapters.map(async (chapter) => {
+            await ctx.db.insert(chapters).values({
+              ...chapter,
+              fanficId: fanfic.id,
+              url: chapter.url,
+              title: chapter.title,
+            });
+          }),
+        );
+
+        await ctx.db
+          .delete(fanficsToShelves)
+          .where(eq(fanficsToShelves.fanficId, fanfic.id));
+        await Promise.all(
+          input.shelves.map(async (shelfId) => {
+            const shelfRelation = await ctx.db
+              .select()
+              .from(fanficsToShelves)
+              .where(
+                and(
+                  eq(fanficsToShelves.shelfId, shelfId),
+                  eq(fanficsToShelves.fanficId, fanfic.id),
+                ),
+              )
+              .limit(1);
+
+            if (shelfRelation.length > 0) {
+              return;
+            }
+            await ctx.db.insert(fanficsToShelves).values({
+              fanficId: fanfic.id,
+              shelfId,
+            });
+          }),
+        );
 
         return fanfic;
       });

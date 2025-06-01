@@ -5,7 +5,7 @@ import { Loading } from "~/components/ui/loading";
 import { api } from "~/utils/api";
 
 const Shelves = () => {
-  const shelvesQuery = api.shelve.getAll.useQuery();
+  const shelvesQuery = api.shelve.getAllWithContent.useQuery();
 
   if (shelvesQuery.isError) {
     return <div>Error: {shelvesQuery.error?.message}</div>;

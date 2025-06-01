@@ -31,6 +31,7 @@ export const EditCreateShelfDialog = ({
     onSuccess: () => {
       toast.success("Shelf created!");
       setIsOpen(false);
+      apiUtils.shelve.getAllWithContent.invalidate().catch(console.error);
       apiUtils.shelve.getAll.invalidate().catch(console.error);
     },
     onError: (error) => {
@@ -42,6 +43,7 @@ export const EditCreateShelfDialog = ({
       toast.success("Shelf edited!");
       setIsOpen(false);
       apiUtils.shelve.getAll.invalidate().catch(console.error);
+      apiUtils.shelve.getAllWithContent.invalidate().catch(console.error);
       apiUtils.shelve.get.invalidate().catch(console.error);
     },
     onError: (error) => {

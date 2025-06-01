@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { MultiSelect } from "~/components/ui/multi-select";
 
 const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
   ({
@@ -60,6 +61,7 @@ const fanficCreateSchema = z.object({
       title: z.string(),
     }),
   ),
+  shelves: z.array(z.number()),
 });
 
 export const EditCreateForm = ({
@@ -182,6 +184,7 @@ export const EditCreateForm = ({
       rating: fanfic?.rating ?? undefined,
       language: fanfic?.language ?? "",
       chapters: fanfic?.chapters ?? [],
+      shelves: fanfic?.shelves ?? [],
     },
   });
 
@@ -198,230 +201,295 @@ export const EditCreateForm = ({
 
   return (
     <>
-      {shelvesQuery.isLoading ? (
-        <div>Loading...</div>
-      ) : shelvesQuery.isError ? (
-        <div>Error: {shelvesQuery.error?.message}</div>
-      ) : (
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Netflix" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="author"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Author</FormLabel>
-                  <FormControl>
-                    <Input placeholder="placeholder" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="rating"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rating</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value ?? undefined}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Ratings.map((r) => (
-                          <SelectItem value={r} key={r}>
-                            {r}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website</FormLabel>
-                  <FormControl>
-                    <Input placeholder="placeholder" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="summary"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Summary</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="placeholder" rows={5} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="likesCount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Likes Count</FormLabel>
-                  <FormControl>
-                    <Input placeholder="placeholder" type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tags</FormLabel>
-                  <FormControl>
-                    <Input placeholder="placeholder" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={() =>
-                  fanfic?.url
-                    ? extractFanficChaptersMutation.mutate(fanfic?.url)
-                    : null
-                }
-                disabled={!fanfic?.url}
-                variant="ghost"
-                className="h-full"
-                type="button"
-              >
-                <RefreshCwIcon
-                  className={cn(
-                    extractFanficChaptersMutation.isPending && "animate-spin",
-                  )}
-                />
-              </Button>
-              <FormItem className="flex w-1/3 flex-col">
-                <FormLabel>Total chapters</FormLabel>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input
-                    value={fanfic?.chapters.length}
-                    type="number"
-                    disabled
+                  <Input placeholder="Netflix" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="author"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Author</FormLabel>
+                <FormControl>
+                  <Input placeholder="placeholder" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="rating"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Rating</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value ?? undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Ratings.map((r) => (
+                        <SelectItem value={r} key={r}>
+                          {r}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website</FormLabel>
+                <FormControl>
+                  <Input placeholder="placeholder" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="summary"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Summary</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="placeholder" rows={5} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="likesCount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Likes Count</FormLabel>
+                <FormControl>
+                  <Input placeholder="placeholder" type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tags</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={[
+                      ...new Set(fanfic?.tags.concat(form.watch("tags")) ?? []),
+                    ].map((tag) => ({
+                      label: tag,
+                      value: tag,
+                    }))}
+                    modalPopover
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    placeholder="Select tags..."
+                    variant="default"
+                    maxCount={1}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
-              <FormField
-                control={form.control}
-                name="isCompleted"
-                render={({ field }) => (
-                  <FormItem className="flex w-1/3 flex-col">
-                    <FormLabel>Completed</FormLabel>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="my-0 mt-3"
-                      />
-                    </FormControl>
-                  </FormItem>
+            )}
+          />
+          <div className="flex gap-2">
+            <Button
+              onClick={() =>
+                fanfic?.url
+                  ? extractFanficChaptersMutation.mutate(fanfic?.url)
+                  : null
+              }
+              disabled={!fanfic?.url}
+              variant="ghost"
+              className="h-full"
+              type="button"
+            >
+              <RefreshCwIcon
+                className={cn(
+                  extractFanficChaptersMutation.isPending && "animate-spin",
                 )}
               />
-            </div>
+            </Button>
+            <FormItem className="flex w-1/3 flex-col">
+              <FormLabel>Total chapters</FormLabel>
+              <FormControl>
+                <Input
+                  value={form.watch("chapters").length}
+                  type="number"
+                  disabled
+                />
+              </FormControl>
+            </FormItem>
             <FormField
               control={form.control}
-              name="fandom"
+              name="isCompleted"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fandom</FormLabel>
+                <FormItem className="flex w-1/3 flex-col">
+                  <FormLabel>Completed</FormLabel>
                   <FormControl>
-                    <Input placeholder="placeholder" {...field} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="my-0 mt-3"
+                    />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="ships"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Ships</FormLabel>
-                  <FormControl>
-                    <Input placeholder="placeholder" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="language"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Language</FormLabel>
-                  <FormControl>
-                    <Input placeholder="placeholder" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button
-                type="submit"
-                isLoading={
-                  createFanficMutation.isPending || editFanficMutation.isPending
-                }
-              >
-                Submit
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      )}
+          </div>
+          <FormField
+            control={form.control}
+            name="fandom"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fandom</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={[
+                      ...new Set(
+                        fanfic?.fandom.concat(form.watch("fandom")) ?? [],
+                      ),
+                    ].map((fandom) => ({
+                      label: fandom,
+                      value: fandom,
+                    }))}
+                    modalPopover
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    placeholder="Select fandoms..."
+                    variant="default"
+                    maxCount={1}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="ships"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ships</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={[
+                      ...new Set(
+                        fanfic?.ships.concat(form.watch("ships")) ?? [],
+                      ),
+                    ].map((ship) => ({
+                      label: ship,
+                      value: ship,
+                    }))}
+                    modalPopover
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    placeholder="Select ships..."
+                    variant="default"
+                    maxCount={1}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="language"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Language</FormLabel>
+                <FormControl>
+                  <Input placeholder="placeholder" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="shelves"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Shelves</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={
+                      shelvesQuery.data?.map((shelve) => ({
+                        label: shelve.name,
+                        value: shelve.id.toString(),
+                      })) ?? []
+                    }
+                    modalPopover
+                    onValueChange={(val) => {
+                      field.onChange(val.map((s) => Number(s)));
+                    }}
+                    defaultValue={field.value?.map((s) => s.toString())}
+                    placeholder="Select shelves..."
+                    variant="default"
+                    maxCount={1}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DialogFooter>
+            <Button
+              type="submit"
+              isLoading={
+                createFanficMutation.isPending || editFanficMutation.isPending
+              }
+            >
+              Submit
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
     </>
   );
 };

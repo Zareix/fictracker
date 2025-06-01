@@ -43,7 +43,7 @@ type Props = {
 
 export const FanficList = ({ fanfics }: Props) => {
   const [filters] = useFilters();
-  const shelvesQuery = api.shelve.getAll.useQuery();
+  const shelvesQuery = api.shelve.getAllWithContent.useQuery();
 
   const filteredFanfics = useMemo(() => {
     let res = fanfics;
@@ -141,7 +141,7 @@ const FanficListItem = ({
     onSuccess: (data) => {
       apiUtils.fanfic.getAll.invalidate().catch(console.error);
       apiUtils.shelve.get.invalidate().catch(console.error);
-      apiUtils.shelve.getAll.invalidate().catch(console.error);
+      apiUtils.shelve.getAllWithContent.invalidate().catch(console.error);
       if (data === "added") {
         toast.success("Fanfic added to shelf!");
       } else {
@@ -156,7 +156,7 @@ const FanficListItem = ({
     onSuccess: () => {
       apiUtils.fanfic.getAll.invalidate().catch(console.error);
       apiUtils.shelve.get.invalidate().catch(console.error);
-      apiUtils.shelve.getAll.invalidate().catch(console.error);
+      apiUtils.shelve.getAllWithContent.invalidate().catch(console.error);
       toast.success("Fanfic grade updated!");
     },
     onError: (err) => {
@@ -293,8 +293,11 @@ const FanficListItem = ({
               <DropdownMenuSubTrigger>
                 <BookMarkedIcon />
                 <span>
-                  In {fanfic.shelves.length}
-                  {fanfic.shelves.length > 1 ? " shelves" : " shelf"}
+                  {fanfic.shelves.length === 0
+                    ? "Add to shelves"
+                    : fanfic.shelves.length === 1
+                      ? `In a shelf`
+                      : `In ${fanfic.shelves.length} shelves`}
                 </span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>

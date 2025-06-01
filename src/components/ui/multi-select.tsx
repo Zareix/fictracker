@@ -142,6 +142,7 @@ export const MultiSelect = ({
     React.useState<string[]>(defaultValue);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isAnimating, setIsAnimating] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
@@ -165,10 +166,18 @@ export const MultiSelect = ({
   const handleClear = () => {
     setSelectedValues([]);
     onValueChange([]);
+    setSearchQuery("");
   };
 
   const handleTogglePopover = () => {
     setIsPopoverOpen((prev) => !prev);
+  };
+
+  const handleSave = () => {
+    onValueChange([...selectedValues, searchQuery]);
+    setSelectedValues((prev) => [...prev, searchQuery]);
+    setSearchQuery("");
+    setIsPopoverOpen(false);
   };
 
   const clearExtraOptions = () => {
@@ -289,6 +298,8 @@ export const MultiSelect = ({
             <CommandInput
               placeholder="Search..."
               onKeyDown={handleInputKeyDown}
+              value={searchQuery}
+              onValueChange={setSearchQuery}
             />
           )}
           <CommandList>
@@ -337,13 +348,29 @@ export const MultiSelect = ({
                 );
               })}
             </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup>
+            <CommandGroup forceMount>
+              <CommandSeparator />
               <div className="flex items-center justify-between">
+                {searchQuery.length > 0 && (
+                  <>
+                    <CommandItem
+                      onSelect={handleSave}
+                      forceMount
+                      className="flex-1 cursor-pointer justify-center"
+                    >
+                      Save
+                    </CommandItem>
+                    <Separator
+                      orientation="vertical"
+                      className="flex h-full min-h-6"
+                    />
+                  </>
+                )}
                 {selectedValues.length > 0 && (
                   <>
                     <CommandItem
                       onSelect={handleClear}
+                      forceMount
                       className="flex-1 cursor-pointer justify-center"
                     >
                       Clear
@@ -356,6 +383,7 @@ export const MultiSelect = ({
                 )}
                 <CommandItem
                   onSelect={() => setIsPopoverOpen(false)}
+                  forceMount
                   className="max-w-full flex-1 cursor-pointer justify-center"
                 >
                   Close

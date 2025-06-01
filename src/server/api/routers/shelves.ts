@@ -16,6 +16,17 @@ import { getAllFanfics } from "~/server/services/fanfic";
 
 export const shelveRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
+    const allShelves = await ctx.db.query.shelves.findMany({
+      orderBy: (tb, { asc }) => asc(tb.name),
+      columns: {
+        id: true,
+        name: true,
+        icon: true,
+      },
+    });
+    return allShelves;
+  }),
+  getAllWithContent: publicProcedure.query(async ({ ctx }) => {
     const allShelves = await ctx.db
       .select({
         id: shelves.id,
