@@ -95,7 +95,7 @@ export const CreateFanficDialog = ({
           </Form>
         ) : (
           <EditCreateForm
-            fanfic={extractFanficDataMutation.data}
+            fanfic={{ ...extractFanficDataMutation.data, shelves: [] }}
             onFinished={() => {
               setIsOpen(false);
               reset();
