@@ -19,6 +19,7 @@ import {
   EditIcon,
   ExternalLinkIcon,
   MinusIcon,
+  MoreVerticalIcon,
   PlusIcon,
   StarIcon,
   TrashIcon,
@@ -192,45 +193,47 @@ const FanficListItem = ({
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Card>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold md:text-center">
-                  {fanfic.title}
-                </h2>
-                <Rating rating={fanfic.rating} />
-              </div>
-              <div className="flex flex-wrap items-center gap-1">
-                {firstFandom && <Badge variant="default">{firstFandom}</Badge>}
-                {firstShip && <Badge variant="secondary">{firstShip}</Badge>}
-              </div>
-            </CardContent>
-            <CardFooter className="text-foreground/80 flex items-center gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
+      <DropdownMenu modal={false}>
+        <Card>
+          <CardContent>
+            <div className="flex items-center gap-1">
+              <h2 className="text-xl font-semibold md:text-center">
+                {fanfic.title}
+              </h2>
+              <Rating rating={fanfic.rating} />
+              <DropdownMenuTrigger>
+                <MoreVerticalIcon size={18} />
+              </DropdownMenuTrigger>
+            </div>
+            <div className="flex flex-wrap items-center gap-1 pt-1">
+              {firstFandom && <Badge variant="default">{firstFandom}</Badge>}
+              {firstShip && <Badge variant="secondary">{firstShip}</Badge>}
+            </div>
+          </CardContent>
+          <CardFooter className="text-foreground/80 flex items-center gap-x-4 gap-y-2 pt-2 text-sm md:gap-x-6">
+            <div className="flex items-center gap-2">
+              <ProgressToStatus
+                isCompleted={fanfic.isCompleted}
+                progress={fanfic.progress}
+                chaptersCount={fanfic.chaptersCount}
+              />
+            </div>
+            {fanfic.grade && (
               <div className="flex gap-2">
-                <ProgressToStatus
-                  isCompleted={fanfic.isCompleted}
-                  progress={fanfic.progress}
-                  chaptersCount={fanfic.chaptersCount}
-                />
+                {Array(fanfic.grade)
+                  .fill(null)
+                  .map((_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: no worry here
+                    <StarIcon key={i} size={16} className="fill-yellow-300" />
+                  ))}
               </div>
-              {fanfic.grade && (
-                <div className="flex gap-2">
-                  {Array(fanfic.grade)
-                    .fill(null)
-                    .map((_, i) => (
-                      <StarIcon key={i} size={16} className="fill-yellow-300" />
-                    ))}
-                </div>
-              )}
-              <div className="ml-auto">
-                {fanfic.progress}/{fanfic.chaptersCount}
-              </div>
-            </CardFooter>
-          </Card>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
+            )}
+            <div className="ml-auto">
+              {fanfic.progress}/{fanfic.chaptersCount}
+            </div>
+          </CardFooter>
+        </Card>
+        <DropdownMenuContent className="mx-2">
           {fanfic.progress < fanfic.chaptersCount && (
             <Link href={fanfic.lastChapterUrl ?? fanfic.url} target="_blank">
               <DropdownMenuItem>
@@ -326,6 +329,7 @@ const FanficListItem = ({
                       .fill(null)
                       .map((_, i) => (
                         <StarIcon
+                          // biome-ignore lint/suspicious/noArrayIndexKey: no worry here
                           key={i}
                           className={cn(
                             grade === fanfic.grade && "fill-yellow-300",
@@ -338,7 +342,7 @@ const FanficListItem = ({
             </DropdownMenuPortal>
           </DropdownMenuSub>
           <DropdownMenuItem
-            className="text-destructive"
+            variant="destructive"
             onClick={() =>
               setIsOpen({
                 ...isOpen,
