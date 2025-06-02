@@ -1,6 +1,6 @@
 This project aims to be a simple and easy-to-use fanfic tracker.
 
-We use :
+The tech stack includes:
 
 - Next.js for the framework
 - Tailwind CSS for styling along with Shadcn/ui

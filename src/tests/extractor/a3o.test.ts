@@ -12,7 +12,9 @@ test(
     expect(fanficData.author).toBe("MsKingBean89");
     expect(fanficData.summary).toStartWith("LONG fic ");
     expect(fanficData.likesCount).toBeGreaterThan(25500);
+    expect(fanficData.website).toBe("Archive of Our Own");
     expect(fanficData.language).toBe("English");
+    expect(fanficData.rating).toBe("M");
 
     expect(fanficData.fandom).toBeArrayOfSize(1);
     expect(fanficData.fandom[0]).toBe("Harry Potter - J. K. Rowling");
@@ -23,10 +25,18 @@ test(
     expect(fanficData.tags).toBeArrayOfSize(19);
     expect(fanficData.tags[0]).toBe("Marauders' Era");
 
-    expect(fanficData.isCompleted).toBe(true);
     expect(fanficData.chapters).toBeArrayOfSize(188);
     expect(fanficData.chapters[0]?.number).toBe(1);
     expect(fanficData.chapters[0]?.wordsCount).toBe(1954);
+    expect(fanficData.chapters[0]?.url).toBe(
+      "https://archiveofourown.org/works/10057010/chapters/22409387",
+    );
+    expect(fanficData.chapters[187]?.number).toBe(188);
+    expect(fanficData.chapters[187]?.wordsCount).toBe(5836);
+    expect(fanficData.chapters[187]?.url).toBe(
+      "https://archiveofourown.org/works/10057010/chapters/38915738",
+    );
+
     expect(
       fanficData.chapters.reduce((acc, curr) => acc + curr.wordsCount, 0),
     ).toBe(520325);
