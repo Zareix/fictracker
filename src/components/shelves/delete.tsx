@@ -24,7 +24,7 @@ export const DeleteShelfDialog = ({
   const apiUtils = api.useUtils();
   const deleteFanficMutation = api.shelve.delete.useMutation({
     onSuccess: () => {
-      toast.success("Fanfic deleted!");
+      toast.success("Shelf deleted!");
       apiUtils.shelve.getAllWithContent.invalidate().catch(console.error);
       apiUtils.shelve.getAll.invalidate().catch(console.error);
       apiUtils.shelve.get.invalidate().catch(console.error);

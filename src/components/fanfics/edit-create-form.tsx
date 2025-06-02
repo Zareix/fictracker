@@ -450,34 +450,34 @@ export const EditCreateForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="shelves"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Shelves</FormLabel>
-                <FormControl>
-                  <MultiSelect
-                    options={
-                      shelvesQuery.data?.map((shelve) => ({
+          {shelvesQuery.data && shelvesQuery.data.length > 0 && (
+            <FormField
+              control={form.control}
+              name="shelves"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Shelves</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={shelvesQuery.data.map((shelve) => ({
                         label: shelve.name,
                         value: shelve.id.toString(),
-                      })) ?? []
-                    }
-                    modalPopover
-                    onValueChange={(val) => {
-                      field.onChange(val.map((s) => Number(s)));
-                    }}
-                    defaultValue={field.value?.map((s) => s.toString())}
-                    placeholder="Select shelves..."
-                    variant="default"
-                    maxCount={1}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                      }))}
+                      modalPopover
+                      onValueChange={(val) => {
+                        field.onChange(val.map((s) => Number(s)));
+                      }}
+                      defaultValue={field.value?.map((s) => s.toString())}
+                      placeholder="Select shelves..."
+                      variant="default"
+                      maxCount={1}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <DialogFooter>
             <Button
               type="submit"

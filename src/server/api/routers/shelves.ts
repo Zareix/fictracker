@@ -174,12 +174,6 @@ export const shelveRouter = createTRPCRouter({
     .input(z.number())
     .mutation(async ({ ctx, input }) => {
       const user = getUserFromSession(ctx.session);
-      if (input === 1) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Cannot delete default shelve",
-        });
-      }
       const shelve = await ctx.db.query.shelves.findFirst({
         where: (tb, { eq, and }) =>
           and(eq(tb.userId, user.id), eq(tb.id, input)),

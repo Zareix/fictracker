@@ -290,7 +290,7 @@ const FanficListItem = ({
             <EditIcon />
             <span>Edit</span>
           </DropdownMenuItem>
-          {shelves.length > 0 && (
+          {shelves.filter((shelf) => shelf.id > 0).length > 0 && (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <BookMarkedIcon />
