@@ -27,7 +27,7 @@ type FicHubResponse = {
       cimage: string;
       crossover: boolean;
       fandom_stubs: string[];
-      favorites: string;
+      favorites?: string;
       follows: string;
       genres: string;
       id: string;
@@ -119,11 +119,12 @@ export const extractFanficData: FanficExtractor = async (workUrl: string) => {
     author: data.meta.author.trim(),
     website: "FanFiction.net",
     summary: data.meta.description.trim().replace(/<[^>]+>/g, ""),
-    likesCount:
-      Number.parseInt(
-        data.meta.rawExtendedMeta.favorites.replace(",", ""),
-        10,
-      ) || 0,
+    likesCount: data.meta.rawExtendedMeta.favorites
+      ? Number.parseInt(
+          data.meta.rawExtendedMeta.favorites.replace(",", ""),
+          10,
+        )
+      : 0,
     rating: parseRating(data.meta.rawExtendedMeta.rated.trim()),
     tags: [],
     isCompleted: parseStatus(data.meta.status.trim()),
