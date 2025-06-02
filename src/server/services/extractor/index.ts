@@ -4,7 +4,7 @@ import * as ao3 from "./ao3";
 export const extractFanficData = async (
   url: string,
 ): Promise<
-  Omit<Fanfic, "id" | "createdAt" | "updatedAt" | "grade"> & {
+  Omit<Fanfic, "id" | "createdAt" | "updatedAt" | "grade" | "userId"> & {
     chapters: Array<{
       number: number;
       wordsCount: number;

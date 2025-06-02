@@ -1,0 +1,1 @@
+ALTER TABLE `fanfic` ADD `user_id` text(255) NOT NULL REFERENCES user(id);

@@ -1,14 +1,19 @@
 import { and, eq, max } from "drizzle-orm";
 import { z } from "zod/v4";
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getUserFromSession } from "~/server/auth";
 import { db, runTransaction } from "~/server/db";
 import { chapters, progress } from "~/server/db/schema";
+import { checkIsUserFanfic } from "~/server/services/fanfic";
 
 export const progressRouter = createTRPCRouter({
-  markAsRead: publicProcedure
+  markAsRead: protectedProcedure
     .input(z.number())
     .mutation(async ({ input, ctx }) => {
       const fanficId = input;
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, fanficId);
+
       const maxChapter = (
         await ctx.db
           .select({
@@ -39,32 +44,42 @@ export const progressRouter = createTRPCRouter({
         }
       });
     }),
-  increment: publicProcedure.input(z.number()).mutation(async ({ input }) => {
-    const lastReadChapter = await db
-      .select({
-        chapterNumber: max(progress.chapterNumber),
-      })
-      .from(progress)
-      .where(eq(progress.fanficId, input));
-    await db.insert(progress).values({
-      fanficId: input,
-      chapterNumber: (lastReadChapter[0]?.chapterNumber ?? 0) + 1,
-    });
-  }),
-  decrement: publicProcedure.input(z.number()).mutation(async ({ input }) => {
-    const lastReadChapter = await db
-      .select({
-        chapterNumber: max(progress.chapterNumber),
-      })
-      .from(progress)
-      .where(eq(progress.fanficId, input));
-    await db
-      .delete(progress)
-      .where(
-        and(
-          eq(progress.fanficId, input),
-          eq(progress.chapterNumber, lastReadChapter[0]?.chapterNumber ?? 0),
-        ),
-      );
-  }),
+  increment: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input);
+
+      const lastReadChapter = await db
+        .select({
+          chapterNumber: max(progress.chapterNumber),
+        })
+        .from(progress)
+        .where(eq(progress.fanficId, input));
+      await db.insert(progress).values({
+        fanficId: input,
+        chapterNumber: (lastReadChapter[0]?.chapterNumber ?? 0) + 1,
+      });
+    }),
+  decrement: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input);
+
+      const lastReadChapter = await db
+        .select({
+          chapterNumber: max(progress.chapterNumber),
+        })
+        .from(progress)
+        .where(eq(progress.fanficId, input));
+      await db
+        .delete(progress)
+        .where(
+          and(
+            eq(progress.fanficId, input),
+            eq(progress.chapterNumber, lastReadChapter[0]?.chapterNumber ?? 0),
+          ),
+        );
+    }),
 });

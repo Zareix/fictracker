@@ -1,16 +1,12 @@
 import { db } from "~/server/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import {
-  account,
-  session,
-  users,
-  verification,
-  passkey as passkeySchema,
-} from "~/server/db/schema";
+import { account, session, users, verification } from "~/server/db/schema";
 import { env } from "~/env";
-import { passkey } from "better-auth/plugins/passkey";
 import type { NextRequest } from "next/server";
+import { emailOTP } from "better-auth/plugins/email-otp";
+import { TRPCError } from "@trpc/server";
+import { sendOTPEmail } from "~/server/services/emails";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -20,38 +16,29 @@ export const auth = betterAuth({
       session,
       account,
       verification,
-      passkey: passkeySchema,
     },
   }),
-  emailAndPassword: {
-    enabled: true,
-    password: {
-      hash: Bun.password.hash,
-      verify: ({ password, hash }) => {
-        return Bun.password.verify(password, hash);
-      },
-    },
-  },
   advanced: {
-    generateId: false,
-  },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        required: true,
-      },
-    },
+    database: { generateId: false },
   },
   trustedOrigins: [env.BETTER_AUTH_URL],
+  socialProviders: {
+    google:
+      env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+        ? {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          }
+        : undefined,
+  },
   plugins: [
-    passkey({
-      rpID:
-        env.NODE_ENV === "production" && env.BETTER_AUTH_URL
-          ? new URL(env.BETTER_AUTH_URL).host
-          : "localhost",
-      rpName: "Subtracker",
-      origin: env.BETTER_AUTH_URL,
+    emailOTP({
+      async sendVerificationOTP({ email, otp }) {
+        await sendOTPEmail({
+          to: email,
+          otpCode: otp,
+        });
+      },
     }),
   ],
 });
@@ -64,3 +51,14 @@ export const isAuthenticated = async (req: NextRequest) =>
       headers: req.headers,
     })
   )?.user;
+
+export const getUserFromSession = (session: Session) => {
+  const user = session?.user;
+  if (!user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You must be logged in to access this resource",
+    });
+  }
+  return user;
+};

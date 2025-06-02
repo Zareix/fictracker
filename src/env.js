@@ -17,6 +17,10 @@ export const env = createEnv({
       z.enum(["development", "test", "production"]),
       "development",
     ),
+    GOOGLE_CLIENT_ID: z.optional(z.string()),
+    GOOGLE_CLIENT_SECRET: z.optional(z.string()),
+    EMAIL_SERVER_URL: z.optional(z.string()),
+    EMAIL_FROM: z.optional(z.string()),
   },
 
   /**
@@ -29,7 +33,6 @@ export const env = createEnv({
       z.enum(["development", "test", "production"]),
       "development",
     ),
-    // NEXT_PUBLIC_AUTH_URL: z.string().url(),
   },
 
   /**
@@ -42,6 +45,10 @@ export const env = createEnv({
     DATABASE_PATH: process.env.DATABASE_PATH,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    EMAIL_SERVER_URL: process.env.EMAIL_SERVER_URL,
+    EMAIL_FROM: process.env.EMAIL_FROM,
     // NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL,
   },
   /**

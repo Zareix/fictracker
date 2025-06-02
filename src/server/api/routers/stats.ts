@@ -1,11 +1,13 @@
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getAllFanfics } from "~/server/services/fanfic";
-import { chapters, progress } from "~/server/db/schema";
+import { chapters, fanfics, progress } from "~/server/db/schema";
 import { and, eq, gte, lte } from "drizzle-orm";
+import { getUserFromSession } from "~/server/auth";
 
 export const statsRouter = createTRPCRouter({
-  getStats: publicProcedure.query(async ({ ctx: { db } }) => {
-    const allFanfics = await getAllFanfics(db);
+  getStats: protectedProcedure.query(async ({ ctx: { session, db } }) => {
+    const user = getUserFromSession(session);
+    const allFanfics = await getAllFanfics(db, user.id);
 
     // All time
     let totalWordsRead = 0;
@@ -38,7 +40,10 @@ export const statsRouter = createTRPCRouter({
         createdAt: progress.createdAt,
       })
       .from(progress)
-      .where(gte(progress.createdAt, monthStart));
+      .innerJoin(fanfics, eq(fanfics.id, progress.fanficId))
+      .where(
+        and(gte(progress.createdAt, monthStart), eq(fanfics.userId, user.id)),
+      );
 
     const completedFanficIds = new Set<number>();
     for (const p of progressThisMonth) {

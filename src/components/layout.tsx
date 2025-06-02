@@ -1,26 +1,26 @@
 import Head from "next/head";
+import { LoginForm } from "~/components/login";
 import { Navbar } from "~/components/nav";
+import { authClient } from "~/lib/auth-client";
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
-  // const session = useSession();
+  const session = authClient.useSession();
 
-  // if (session.isPending) return <></>;
+  if (session.isPending) return <></>;
 
-  // if (!session.data) {
-  //   return (
-  //     <>
-  //       <Head>
-  //         <title>Sub Tracker - Login</title>
-  //         <meta name="description" content="Track your subscriptions" />
-  //       </Head>
-  //       <main className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-  //         <div className="flex w-full max-w-sm flex-col gap-6">
-  //           <LoginForm />
-  //         </div>
-  //       </main>
-  //     </>
-  //   );
-  // }
+  if (!session.data) {
+    return (
+      <>
+        <Head>
+          <title>Sub Tracker - Login</title>
+          <meta name="description" content="Track your subscriptions" />
+        </Head>
+        <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+          <LoginForm />
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

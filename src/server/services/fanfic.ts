@@ -1,3 +1,5 @@
+import { TRPCError } from "@trpc/server";
+import type { User } from "better-auth";
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { DB } from "~/server/db";
 import {
@@ -7,7 +9,11 @@ import {
   progress,
 } from "~/server/db/schema";
 
-export const getAllFanfics = async (db: DB, shelfId?: number) => {
+export const getAllFanfics = async (
+  db: DB,
+  userId: User["id"],
+  shelfId?: number,
+) => {
   const allFanfics = await db
     .select({
       id: fanfics.id,
@@ -33,7 +39,12 @@ export const getAllFanfics = async (db: DB, shelfId?: number) => {
     .leftJoin(fanficsToShelves, eq(fanfics.id, fanficsToShelves.fanficId))
     .groupBy(fanfics.id)
     .orderBy(asc(fanfics.title))
-    .where(shelfId ? eq(fanficsToShelves.shelfId, shelfId) : undefined);
+    .where(
+      and(
+        eq(fanfics.userId, userId),
+        shelfId ? eq(fanficsToShelves.shelfId, shelfId) : undefined,
+      ),
+    );
 
   const fanficsToShelvesData = await db.select().from(fanficsToShelves);
 
@@ -55,4 +66,22 @@ export const getAllFanfics = async (db: DB, shelfId?: number) => {
         .then((chapters) => chapters[0]?.url),
     })),
   );
+};
+
+export const checkIsUserFanfic = async (
+  db: DB,
+  userId: User["id"],
+  fanficId: number,
+) => {
+  const fanfic = await db
+    .select()
+    .from(fanfics)
+    .where(and(eq(fanfics.id, fanficId), eq(fanfics.userId, userId)))
+    .limit(1);
+  if (fanfic.length === 0) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Fanfic not found",
+    });
+  }
 };

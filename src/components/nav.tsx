@@ -3,6 +3,7 @@ import {
   BookMarkedIcon,
   HomeIcon,
   PlusCircleIcon,
+  User2Icon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -25,6 +26,11 @@ export const NAV_ITEMS = [
     title: "All fanfics",
     url: "/fanfics",
     icon: BookCopyIcon,
+  },
+  {
+    title: "Profile",
+    url: "/profile",
+    icon: User2Icon,
   },
 ] as const;
 
@@ -63,8 +69,8 @@ export const Navbar = () => {
       className="border-border bg-background/80 fixed right-0 bottom-0 left-0 z-10 flex h-14
         items-center justify-between border-t px-4 backdrop-blur md:px-8"
     >
-      <div className="grid h-full w-full grid-cols-4 content-center items-center justify-around gap-2">
-        {navBarItems.map((item) => (
+      <div className="grid h-full w-full grid-cols-5 content-center items-center justify-around gap-2">
+        {navBarItems.slice(0, navBarItems.length / 2).map((item) => (
           <NavbarItem key={item.title} {...item} pathname={router.pathname} />
         ))}
         <CreateFanficDialog
@@ -77,6 +83,11 @@ export const Navbar = () => {
             </Button>
           }
         />
+        {navBarItems
+          .slice(navBarItems.length / 2, navBarItems.length)
+          .map((item) => (
+            <NavbarItem key={item.title} {...item} pathname={router.pathname} />
+          ))}
       </div>
     </nav>
   );

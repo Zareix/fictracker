@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
-import { asc, eq, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { z } from "zod/v4";
 import { preprocessStringToNumber } from "~/lib/utils";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getUserFromSession } from "~/server/auth";
 import { runTransaction } from "~/server/db";
 import {
   chapters,
@@ -12,12 +13,14 @@ import {
   progress,
   shelves,
 } from "~/server/db/schema";
-import { getAllFanfics } from "~/server/services/fanfic";
+import { checkIsUserFanfic, getAllFanfics } from "~/server/services/fanfic";
 
 export const shelveRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    const user = getUserFromSession(ctx.session);
     const allShelves = await ctx.db.query.shelves.findMany({
       orderBy: (tb, { asc }) => asc(tb.name),
+      where: (tb, { eq }) => eq(tb.userId, user.id),
       columns: {
         id: true,
         name: true,
@@ -26,7 +29,8 @@ export const shelveRouter = createTRPCRouter({
     });
     return allShelves;
   }),
-  getAllWithContent: publicProcedure.query(async ({ ctx }) => {
+  getAllWithContent: protectedProcedure.query(async ({ ctx }) => {
+    const user = getUserFromSession(ctx.session);
     const allShelves = await ctx.db
       .select({
         id: shelves.id,
@@ -36,6 +40,7 @@ export const shelveRouter = createTRPCRouter({
       })
       .from(shelves)
       .leftJoin(fanficsToShelves, eq(shelves.id, fanficsToShelves.shelfId))
+      .where(eq(shelves.userId, user.id))
       .groupBy(shelves.id)
       .orderBy(asc(shelves.name));
 
@@ -54,6 +59,7 @@ export const shelveRouter = createTRPCRouter({
           .leftJoin(progress, eq(fanfics.id, progress.fanficId))
           .leftJoin(chapters, eq(fanfics.id, chapters.fanficId))
           .leftJoin(fanficsToShelves, eq(fanfics.id, fanficsToShelves.fanficId))
+          .where(eq(fanfics.userId, user.id))
           .groupBy(fanfics.id)
       ).filter(
         (fanfic) =>
@@ -63,22 +69,24 @@ export const shelveRouter = createTRPCRouter({
 
     return [inProgressShelf, ...allShelves];
   }),
-  get: publicProcedure
+  get: protectedProcedure
     .input(z.preprocess(preprocessStringToNumber, z.number()))
     .query(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
       if (input === -1) {
         return {
           id: -1,
           name: "In progress",
           icon: "",
-          fanfics: (await getAllFanfics(ctx.db)).filter(
+          fanfics: (await getAllFanfics(ctx.db, user.id)).filter(
             (fanfic) =>
               fanfic.progress > 0 && fanfic.progress < fanfic.chaptersCount,
           ),
         };
       }
       const shelf = await ctx.db.query.shelves.findFirst({
-        where: (tb, { eq }) => eq(tb.id, input),
+        where: (tb, { eq, and }) =>
+          and(eq(tb.userId, user.id), eq(tb.id, input)),
         columns: {
           id: true,
           name: true,
@@ -94,17 +102,19 @@ export const shelveRouter = createTRPCRouter({
 
       return {
         ...shelf,
-        fanfics: await getAllFanfics(ctx.db, input),
+        fanfics: await getAllFanfics(ctx.db, user.id, input),
       };
     }),
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({ name: z.string(), icon: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
       const shelvesReturned = await ctx.db
         .insert(shelves)
         .values({
           name: input.name,
           icon: input.icon,
+          userId: user.id,
         })
         .returning({
           id: shelves.id,
@@ -124,7 +134,7 @@ export const shelveRouter = createTRPCRouter({
         icon: shelve.icon,
       };
     }),
-  edit: publicProcedure
+  edit: protectedProcedure
     .input(
       z.object({
         id: z.number().positive(),
@@ -133,13 +143,15 @@ export const shelveRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+
       const shelvesReturned = await ctx.db
         .update(shelves)
         .set({
           name: input.name,
           icon: input.icon,
         })
-        .where(eq(shelves.id, input.id))
+        .where(and(eq(shelves.id, input.id), eq(shelves.userId, user.id)))
         .returning({
           id: shelves.id,
           name: shelves.name,
@@ -158,37 +170,43 @@ export const shelveRouter = createTRPCRouter({
         icon: shelve.icon,
       };
     }),
-  delete: publicProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
-    if (input === 1) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Cannot delete default shelve",
+  delete: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      if (input === 1) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Cannot delete default shelve",
+        });
+      }
+      const shelve = await ctx.db.query.shelves.findFirst({
+        where: (tb, { eq, and }) =>
+          and(eq(tb.userId, user.id), eq(tb.id, input)),
       });
-    }
-    const shelve = await ctx.db.query.shelves.findFirst({
-      where: (tb, { eq }) => eq(tb.id, input),
-    });
-    if (!shelve) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Error creating shelve",
+      if (!shelve) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Error creating shelve",
+        });
+      }
+      await runTransaction(ctx.db, async () => {
+        await ctx.db
+          .delete(fanficsToShelves)
+          .where(eq(fanficsToShelves.shelfId, input));
+        await ctx.db.delete(shelves).where(eq(shelves.id, input));
       });
-    }
-    await runTransaction(ctx.db, async () => {
-      await ctx.db
-        .delete(fanficsToShelves)
-        .where(eq(fanficsToShelves.shelfId, input));
-      await ctx.db.delete(shelves).where(eq(shelves.id, input));
-    });
-    return {
-      id: shelve.id,
-      name: shelve.name,
-      icon: shelve.icon,
-    };
-  }),
-  toggleFanfic: publicProcedure
+      return {
+        id: shelve.id,
+        name: shelve.name,
+        icon: shelve.icon,
+      };
+    }),
+  toggleFanfic: protectedProcedure
     .input(z.object({ fanficId: z.number(), shelfId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input.fanficId);
       const isInShelf = await ctx.db.query.fanficsToShelves.findFirst({
         where: (tb, { eq, and }) =>
           and(eq(tb.fanficId, input.fanficId), eq(tb.shelfId, input.shelfId)),

@@ -7,7 +7,7 @@ import {
   sqliteTable,
   text,
 } from "drizzle-orm/sqlite-core";
-import type { Rating, UserRole } from "~/lib/constant";
+import type { Rating } from "~/lib/constant";
 
 export const shelves = sqliteTable(
   "shelve",
@@ -15,12 +15,19 @@ export const shelves = sqliteTable(
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
     name: text("name", { length: 256 }).notNull(),
     icon: text("icon", { length: 256 }),
+    userId: text("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [index("shelve_name_idx").on(table.name)],
 );
 
-export const shelvesRelations = relations(shelves, ({ many }) => ({
+export const shelvesRelations = relations(shelves, ({ many, one }) => ({
   fanfics: many(fanfics),
+  user: one(users, {
+    fields: [shelves.userId],
+    references: [users.id],
+  }),
 }));
 
 export type Shelve = typeof shelves.$inferSelect;
@@ -51,6 +58,9 @@ export const fanfics = sqliteTable(
       .default(sql`'[]'`),
     language: text("language", { length: 256 }).notNull(),
     grade: int("grade", { mode: "number" }),
+    userId: text("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
 
     createdAt: int("created_at", { mode: "timestamp" })
       .default(sql`(unixepoch())`)
@@ -62,10 +72,14 @@ export const fanfics = sqliteTable(
   (table) => [index("fanfic_title_idx").on(table.title)],
 );
 
-export const fanficsRelations = relations(fanfics, ({ many }) => ({
+export const fanficsRelations = relations(fanfics, ({ many, one }) => ({
   progresses: many(progress),
   chapters: many(chapters),
   shelves: many(shelves),
+  user: one(users, {
+    fields: [fanfics.userId],
+    references: [users.id],
+  }),
 }));
 
 export type Fanfic = typeof fanfics.$inferSelect;
@@ -154,10 +168,6 @@ export const users = sqliteTable(
       .$defaultFn(() => Bun.randomUUIDv7()),
     name: text("name", { length: 255 }).notNull(),
     email: text("email").notNull().unique(),
-    role: text("role", { length: 255 })
-      .notNull()
-      .$type<UserRole>()
-      .default("user"),
     image: text("image", { length: 255 }),
     emailVerified: integer("email_verified", { mode: "boolean" })
       .notNull()
@@ -224,21 +234,4 @@ export const verification = sqliteTable("verification", {
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }),
   updatedAt: integer("updated_at", { mode: "timestamp" }),
-});
-
-export const passkey = sqliteTable("passkey", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => Bun.randomUUIDv7()),
-  name: text("name"),
-  publicKey: text("public_key").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  credentialID: text("credential_i_d").notNull(),
-  counter: integer("counter").notNull(),
-  deviceType: text("device_type").notNull(),
-  backedUp: integer("backed_up", { mode: "boolean" }).notNull(),
-  transports: text("transports"),
-  createdAt: integer("created_at", { mode: "timestamp" }),
 });

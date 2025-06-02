@@ -3,26 +3,28 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod/v4";
 import { Ratings } from "~/lib/constant";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { getUserFromSession } from "~/server/auth";
 import { runTransaction } from "~/server/db";
 import { chapters, fanfics, fanficsToShelves } from "~/server/db/schema";
 import {
   extractFanficChapters,
   extractFanficData,
 } from "~/server/services/extractor";
-import { getAllFanfics } from "~/server/services/fanfic";
+import { checkIsUserFanfic, getAllFanfics } from "~/server/services/fanfic";
 
 export const fanficRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    return getAllFanfics(ctx.db);
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    const user = getUserFromSession(ctx.session);
+    return getAllFanfics(ctx.db, user.id);
   }),
-  extractData: publicProcedure
+  extractData: protectedProcedure
     .input(z.string())
     .mutation(async ({ input }) => extractFanficData(input)),
-  extractChapters: publicProcedure
+  extractChapters: protectedProcedure
     .input(z.string())
     .mutation(async ({ input }) => extractFanficChapters(input)),
-  create: publicProcedure
+  create: protectedProcedure
     .input(
       z.object({
         title: z.string(),
@@ -49,10 +51,12 @@ export const fanficRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
       const fanfic = await runTransaction(ctx.db, async () => {
         const fanficsReturned = await ctx.db
           .insert(fanfics)
           .values({
+            userId: user.id,
             title: input.title,
             url: input.url,
             author: input.author,
@@ -117,7 +121,7 @@ export const fanficRouter = createTRPCRouter({
         id: fanfic.id,
       };
     }),
-  edit: publicProcedure
+  edit: protectedProcedure
     .input(
       z.object({
         id: z.number(),
@@ -146,10 +150,13 @@ export const fanficRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input.id);
       const fanfic = await runTransaction(ctx.db, async () => {
         const fanficsReturned = await ctx.db
           .update(fanfics)
           .set({
+            userId: user.id,
             title: input.title,
             url: input.url,
             author: input.author,
@@ -222,7 +229,7 @@ export const fanficRouter = createTRPCRouter({
         id: fanfic.id,
       };
     }),
-  updateGrade: publicProcedure
+  updateGrade: protectedProcedure
     .input(
       z.object({
         id: z.number(),
@@ -230,6 +237,8 @@ export const fanficRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input.id);
       const fanfic = await runTransaction(ctx.db, async () => {
         const [currentFanfic] = await ctx.db
           .select({
@@ -271,10 +280,14 @@ export const fanficRouter = createTRPCRouter({
         id: fanfic.id,
       };
     }),
-  delete: publicProcedure.input(z.number()).mutation(async ({ ctx, input }) => {
-    await runTransaction(ctx.db, async () => {
-      // await db.delete(usersToFanfics).where(eq(usersToFanfics.fanficId, input));
-      await ctx.db.delete(fanfics).where(eq(fanfics.id, input));
-    });
-  }),
+  delete: protectedProcedure
+    .input(z.number())
+    .mutation(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input);
+      await runTransaction(ctx.db, async () => {
+        // await db.delete(usersToFanfics).where(eq(usersToFanfics.fanficId, input));
+        await ctx.db.delete(fanfics).where(eq(fanfics.id, input));
+      });
+    }),
 });
