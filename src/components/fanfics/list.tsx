@@ -200,10 +200,12 @@ const FanficListItem = ({
               <h2 className="text-xl font-semibold md:text-center">
                 {fanfic.title}
               </h2>
-              <Rating rating={fanfic.rating} />
-              <DropdownMenuTrigger>
-                <MoreVerticalIcon size={18} />
-              </DropdownMenuTrigger>
+              <div className="ml-auto flex items-center gap-1">
+                <Rating rating={fanfic.rating} />
+                <DropdownMenuTrigger>
+                  <MoreVerticalIcon size={18} />
+                </DropdownMenuTrigger>
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-1 pt-1">
               {firstFandom && <Badge variant="default">{firstFandom}</Badge>}
@@ -417,19 +419,19 @@ const Rating = ({ rating }: { rating: FanficItem["rating"] }) => {
   switch (rating) {
     case "K":
       return (
-        <Badge className="ml-auto flex h-6 w-6 items-center justify-center bg-green-800 p-0">
+        <Badge className="flex h-6 w-6 items-center justify-center bg-green-800 p-0">
           {rating}
         </Badge>
       );
     case "T":
       return (
-        <Badge className="ml-auto flex h-6 w-6 items-center justify-center bg-amber-500 p-0">
+        <Badge className="flex h-6 w-6 items-center justify-center bg-amber-500 p-0">
           {rating}
         </Badge>
       );
     case "M":
       return (
-        <Badge className="ml-auto flex h-6 w-6 items-center justify-center bg-red-700 p-0">
+        <Badge className="flex h-6 w-6 items-center justify-center bg-red-700 p-0">
           {rating}
         </Badge>
       );
