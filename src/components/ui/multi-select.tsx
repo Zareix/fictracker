@@ -232,7 +232,9 @@ export const MultiSelect = ({
                       {IconComponent && (
                         <IconComponent className="mr-2 size-4" />
                       )}
-                      {option?.label}
+                      <span className="max-w-[6rem] overflow-hidden text-ellipsis whitespace-nowrap">
+                        {option?.label}
+                      </span>
                       <XCircle
                         className="ml-2 size-4 cursor-pointer"
                         onClick={(event) => {
