@@ -6,7 +6,10 @@ import { env } from "~/env";
 import type { NextRequest } from "next/server";
 import { emailOTP } from "better-auth/plugins/email-otp";
 import { TRPCError } from "@trpc/server";
-import { sendOTPEmail } from "~/server/services/emails";
+import {
+  sendChangeEmailVerification,
+  sendOTPEmail,
+} from "~/server/services/emails";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -41,6 +44,17 @@ export const auth = betterAuth({
       },
     }),
   ],
+  user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailVerification: async ({ newEmail, url }) => {
+        await sendChangeEmailVerification({
+          to: newEmail,
+          url,
+        });
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

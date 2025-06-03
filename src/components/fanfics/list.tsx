@@ -237,7 +237,14 @@ const FanficListItem = ({
         </Card>
         <DropdownMenuContent className="mx-2">
           {fanfic.progress < fanfic.chaptersCount && (
-            <Link href={fanfic.lastChapterUrl ?? fanfic.url} target="_blank">
+            <Link
+              href={
+                fanfic.lastChapterUrl && fanfic.lastChapterUrl.length > 0
+                  ? fanfic.lastChapterUrl
+                  : fanfic.url
+              }
+              target="_blank"
+            >
               <DropdownMenuItem>
                 <ExternalLinkIcon />
                 <span>Continue reading</span>

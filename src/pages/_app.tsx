@@ -37,8 +37,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
             <Layout>
               <Component {...pageProps} />
             </Layout>
+            <Toaster />
           </div>
-          <Toaster />
           {env.NEXT_PUBLIC_ENV === "development" && <ReactQueryDevtools />}
         </TooltipProvider>
       </NuqsAdapter>

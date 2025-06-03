@@ -280,6 +280,17 @@ export const fanficRouter = createTRPCRouter({
         id: fanfic.id,
       };
     }),
+  getChapters: protectedProcedure
+    .input(z.object({ fanficId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const user = getUserFromSession(ctx.session);
+      await checkIsUserFanfic(ctx.db, user.id, input.fanficId);
+      return ctx.db
+        .select()
+        .from(chapters)
+        .where(eq(chapters.fanficId, input.fanficId))
+        .orderBy(chapters.number);
+    }),
   delete: protectedProcedure
     .input(z.number())
     .mutation(async ({ ctx, input }) => {

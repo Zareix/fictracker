@@ -114,7 +114,7 @@ export const fanficsToShelvesRelations = relations(
 export const chapters = sqliteTable(
   "chapter",
   {
-    number: int("number", { mode: "number" }),
+    number: int("number", { mode: "number" }).notNull(),
     fanficId: int("fanfic_id", { mode: "number" })
       .notNull()
       .references(() => fanfics.id, { onDelete: "cascade" }),

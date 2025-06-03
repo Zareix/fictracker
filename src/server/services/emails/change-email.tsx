@@ -8,18 +8,19 @@ import {
   Section,
   Font,
   Tailwind,
+  Button,
 } from "@react-email/components";
 import * as React from "react";
 
-interface OTPEmailProps {
-  otpCode?: string;
+interface ChangeEmailAddressEmailProps {
+  url: string;
   title?: string;
 }
 
-export default function OTPEmail({
-  otpCode = "123456",
-  title = "Your Verification Code For Fictracker",
-}: OTPEmailProps) {
+export default function ChangeEmailAddressEmail({
+  url,
+  title = "Confirm Your Email Change on Fictracker",
+}: ChangeEmailAddressEmailProps) {
   return (
     <Tailwind>
       <Html>
@@ -42,17 +43,22 @@ export default function OTPEmail({
                 {title}
               </Heading>
               <Text className="m-0 mb-6 text-center text-base leading-6 text-gray-600">
-                Please use the following verification code to complete your
-                authentication:
+                We received a request to change your email address. Please click
+                the button below to confirm this change:
               </Text>
-              <Section
-                className="my-6 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6
-                  text-center"
-              >
-                <Text className="m-0 p-4 font-mono text-3xl font-bold tracking-widest text-gray-900">
-                  {otpCode}
-                </Text>
+              <Section className="my-6 text-center">
+                <Button
+                  href={url}
+                  className="rounded-lg bg-blue-600 px-6 py-3 text-center text-base font-medium text-white
+                    no-underline hover:bg-blue-700"
+                >
+                  Confirm Email Change
+                </Button>
               </Section>
+              <Text className="m-0 mb-4 text-center text-sm leading-5 text-gray-500">
+                If you didn&apos;t request this change, you can safely ignore
+                this email.
+              </Text>
             </Section>
           </Container>
         </Body>
