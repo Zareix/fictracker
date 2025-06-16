@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod/v4-mini";
 import { DialogFooter } from "~/components/ui/dialog";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -47,7 +47,7 @@ const fanficCreateSchema = z.object({
   author: z.string(),
   website: z.string(),
   summary: z.string(),
-  likesCount: z.transform((val) => Number(val)),
+  likesCount: z.number(),
   tags: z.array(z.string()),
   rating: z.nullish(z.enum(Ratings)),
   isCompleted: z.boolean(),
@@ -169,8 +169,8 @@ export const EditCreateForm = ({
   });
   const shelvesQuery = api.shelve.getAll.useQuery();
 
-  const form = useForm<z.infer<typeof fanficCreateSchema>>({
-    resolver: standardSchemaResolver(fanficCreateSchema),
+  const form = useForm({
+    resolver: zodResolver(fanficCreateSchema),
     defaultValues: {
       title: fanfic?.title ?? "",
       url: fanfic?.url ?? undefined,
@@ -314,7 +314,12 @@ export const EditCreateForm = ({
               <FormItem>
                 <FormLabel>Likes Count</FormLabel>
                 <FormControl>
-                  <Input placeholder="placeholder" type="number" {...field} />
+                  <Input
+                    placeholder="placeholder"
+                    type="number"
+                    {...field}
+                    onChange={(event) => field.onChange(+event.target.value)}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

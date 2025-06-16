@@ -1,6 +1,6 @@
 import { z } from "zod/v4-mini";
 import { useForm } from "react-hook-form";
-import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -51,8 +51,8 @@ export const EditCreateShelfDialog = ({
     },
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: standardSchemaResolver(formSchema),
+  const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: shelf?.name ?? "",
       icon: shelf?.icon ?? "album",
