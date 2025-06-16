@@ -66,6 +66,10 @@ export const FanficList = ({ fanfics }: Props) => {
     if (filters.language) {
       res = res.filter((f) => f.language === filters.language);
     }
+    if (filters.isCompleted && filters.isCompleted !== "All") {
+      const isCompleted = filters.isCompleted === "Yes";
+      res = res.filter((f) => f.isCompleted === isCompleted);
+    }
     return res;
   }, [
     fanfics,
@@ -74,6 +78,7 @@ export const FanficList = ({ fanfics }: Props) => {
     filters.ships,
     filters.tags,
     filters.language,
+    filters.isCompleted,
   ]);
 
   if (filteredFanfics.length === 0) {

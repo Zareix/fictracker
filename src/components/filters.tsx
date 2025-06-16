@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { MultiSelect } from "~/components/ui/multi-select";
-import { type Rating, Ratings } from "~/lib/constant";
+import { type Rating, Ratings, CompletionStatus } from "~/lib/constant";
 import { useFilters } from "~/lib/hooks/use-filters";
 import { cn } from "~/lib/utils";
 import { api } from "~/utils/api";
@@ -85,7 +85,12 @@ export const FiltersButton = () => {
             <FilterIcon
               size={24}
               className={cn(
-                filters.rating
+                filters.rating ||
+                  filters.fandom ||
+                  filters.language ||
+                  (filters.ships && filters.ships.length > 0) ||
+                  (filters.tags && filters.tags.length > 0) ||
+                  (filters.isCompleted && filters.isCompleted !== "All")
                   ? "fill-primary text-primary"
                   : "`text-foreground",
               )}
@@ -93,6 +98,38 @@ export const FiltersButton = () => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="mr-3 flex w-[calc(100vw-2rem)] flex-col gap-2 p-4 md:w-fit">
+          <Label>Completed</Label>
+          <div className="flex items-center gap-2">
+            <Select
+              onValueChange={(value) =>
+                setFilters({
+                  isCompleted: value as typeof filters.isCompleted,
+                })
+              }
+              value={filters.isCompleted ?? "All"}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select..." />
+              </SelectTrigger>
+              <SelectContent>
+                {CompletionStatus.map((status) => (
+                  <SelectItem value={status} key={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {filters.isCompleted && filters.isCompleted !== "All" && (
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => clearFilter("isCompleted")}
+              >
+                <TrashIcon className="size-5" />
+              </Button>
+            )}
+          </div>
+
           <Label>Fandom</Label>
           <div className="flex items-center gap-2">
             <Select

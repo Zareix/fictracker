@@ -45,6 +45,7 @@ export const EditFanficDialog = ({ fanfic, isOpen, setIsOpen }: Props) => {
             }}
             fanfic={{
               ...fanfic,
+              url: fanfic.url ?? undefined,
               chapters: chaptersQuery.data,
             }}
           />

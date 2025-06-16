@@ -1,4 +1,4 @@
-import { Ratings } from "~/lib/constant";
+import { Ratings, CompletionStatus } from "~/lib/constant";
 import {
   useQueryState,
   parseAsStringLiteral,
@@ -18,6 +18,10 @@ export const useFilters = () => {
     parseAsArrayOf(parseAsString),
   );
   const [tags, setTags] = useQueryState("tags", parseAsArrayOf(parseAsString));
+  const [isCompleted, setIsCompleted] = useQueryState(
+    "isCompleted",
+    parseAsStringLiteral(CompletionStatus).withDefault("All"),
+  );
 
   const setFilters = (filters: {
     rating?: typeof rating;
@@ -25,6 +29,7 @@ export const useFilters = () => {
     fandom?: typeof fandom;
     ships?: typeof ships;
     tags?: typeof tags;
+    isCompleted?: typeof isCompleted;
   }) => {
     if (filters.rating) {
       setRating(filters.rating).catch(console.error);
@@ -41,10 +46,20 @@ export const useFilters = () => {
     if (filters.tags !== undefined) {
       setTags(filters.tags).catch(console.error);
     }
+    if (filters.isCompleted) {
+      setIsCompleted(filters.isCompleted).catch(console.error);
+    }
   };
 
   const clearFilter = (
-    filter: "all" | "rating" | "language" | "fandom" | "ships" | "tags",
+    filter:
+      | "all"
+      | "rating"
+      | "language"
+      | "fandom"
+      | "ships"
+      | "tags"
+      | "isCompleted",
   ) => {
     if (filter === "rating" || filter === "all") {
       setRating(null).catch(console.error);
@@ -62,6 +77,9 @@ export const useFilters = () => {
     if (filter === "tags" || filter === "all") {
       setTags(null).catch(console.error);
     }
+    if (filter === "isCompleted" || filter === "all") {
+      setIsCompleted("All").catch(console.error);
+    }
   };
 
   return [
@@ -71,6 +89,7 @@ export const useFilters = () => {
       fandom,
       ships,
       tags,
+      isCompleted,
     },
     setFilters,
     clearFilter,
