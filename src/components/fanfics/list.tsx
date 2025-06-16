@@ -236,7 +236,7 @@ const FanficListItem = ({
           </CardFooter>
         </Card>
         <DropdownMenuContent className="mx-2">
-          {fanfic.progress < fanfic.chaptersCount && (
+          {fanfic.url && fanfic.progress < fanfic.chaptersCount && (
             <Link
               href={
                 fanfic.lastChapterUrl && fanfic.lastChapterUrl.length > 0

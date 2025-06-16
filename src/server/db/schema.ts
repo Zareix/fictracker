@@ -37,7 +37,7 @@ export const fanfics = sqliteTable(
   {
     id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
     title: text("title", { length: 256 }).notNull(),
-    url: text("url", { length: 256 }).notNull(),
+    url: text("url", { length: 256 }),
     author: text("author", { length: 256 }).notNull(),
     website: text("website", { length: 256 }).notNull(),
     summary: text("summary", { length: 256 }).notNull(),

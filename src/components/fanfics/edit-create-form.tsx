@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { cn } from "~/lib/utils";
 import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
-import { RefreshCwIcon } from "lucide-react";
+import { MinusIcon, PlusIcon, RefreshCwIcon } from "lucide-react";
 import { Ratings } from "~/lib/constant";
 import {
   Select,
@@ -31,6 +31,7 @@ import { MultiSelect } from "~/components/ui/multi-select";
 const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
   ({
     ...fanfic,
+    url: fanfic.url ?? null,
     id: -1,
     progress: 0,
     chaptersCount: fanfic.chapters.length,
@@ -42,7 +43,7 @@ const createTempSub = (fanfic: RouterInputs["fanfic"]["create"]) =>
 
 const fanficCreateSchema = z.object({
   title: z.string(),
-  url: z.url(),
+  url: z.optional(z.url()),
   author: z.string(),
   website: z.string(),
   summary: z.string(),
@@ -132,7 +133,7 @@ export const EditCreateForm = ({
           {
             ...oldSub,
             title: newFanfic.title,
-            url: newFanfic.url,
+            url: newFanfic.url ?? null,
             author: newFanfic.author,
             website: newFanfic.website,
             summary: newFanfic.summary,
@@ -172,7 +173,7 @@ export const EditCreateForm = ({
     resolver: standardSchemaResolver(fanficCreateSchema),
     defaultValues: {
       title: fanfic?.title ?? "",
-      url: fanfic?.url ?? "",
+      url: fanfic?.url ?? undefined,
       author: fanfic?.author ?? "",
       website: fanfic?.website ?? "",
       summary: fanfic?.summary ?? "",
@@ -223,7 +224,16 @@ export const EditCreateForm = ({
               <FormItem>
                 <FormLabel>URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com" {...field} />
+                  <Input
+                    placeholder="https://example.com"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      if (e.target.value?.length === 0) {
+                        form.setValue("url", undefined);
+                      }
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -336,24 +346,63 @@ export const EditCreateForm = ({
               </FormItem>
             )}
           />
-          <div className="flex gap-2">
-            <Button
-              onClick={() =>
-                fanfic?.url
-                  ? extractFanficChaptersMutation.mutate(fanfic?.url)
-                  : null
-              }
-              disabled={!fanfic?.url}
-              variant="ghost"
-              className="h-full"
-              type="button"
-            >
-              <RefreshCwIcon
-                className={cn(
-                  extractFanficChaptersMutation.isPending && "animate-spin",
-                )}
-              />
-            </Button>
+          <div className="flex items-center gap-2">
+            {(form.watch("url") ?? "").length > 0 ? (
+              <Button
+                onClick={() =>
+                  fanfic?.url
+                    ? extractFanficChaptersMutation.mutate(fanfic?.url)
+                    : null
+                }
+                disabled={!fanfic?.url}
+                variant="ghost"
+                className="h-full"
+                type="button"
+              >
+                <RefreshCwIcon
+                  className={cn(
+                    extractFanficChaptersMutation.isPending && "animate-spin",
+                  )}
+                />
+              </Button>
+            ) : (
+              <div className="flex h-full items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  type="button"
+                  onClick={() => {
+                    const oldChapters = form.getValues("chapters");
+                    if (oldChapters.length === 0) return;
+                    form.setValue(
+                      "chapters",
+                      oldChapters.slice(0, oldChapters.length - 1),
+                    );
+                  }}
+                >
+                  <MinusIcon />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  type="button"
+                  onClick={() => {
+                    const oldChapters = form.getValues("chapters");
+                    form.setValue("chapters", [
+                      ...oldChapters,
+                      {
+                        number: oldChapters.length + 1,
+                        wordsCount: 0,
+                        url: "",
+                        title: "",
+                      },
+                    ]);
+                  }}
+                >
+                  <PlusIcon />
+                </Button>
+              </div>
+            )}
             <FormItem className="flex w-1/3 flex-col">
               <FormLabel>Total chapters</FormLabel>
               <FormControl>

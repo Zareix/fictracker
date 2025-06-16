@@ -53,6 +53,10 @@ export const CreateFanficDialog = ({
     extractFanficDataMutation.reset();
   };
 
+  const skip = () => {
+    extractFanficDataMutation.mutate("");
+  };
+
   return (
     <Drawer
       open={isOpen}
@@ -84,12 +88,18 @@ export const CreateFanficDialog = ({
                 )}
               />
               <DrawerFooter>
-                <Button
-                  type="submit"
-                  isLoading={extractFanficDataMutation.isPending}
-                >
-                  Submit
-                </Button>
+                {form.formState.isValid ? (
+                  <Button
+                    type="submit"
+                    isLoading={extractFanficDataMutation.isPending}
+                  >
+                    Submit
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={skip} variant="secondary">
+                    Skip
+                  </Button>
+                )}
               </DrawerFooter>
             </form>
           </Form>

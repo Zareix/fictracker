@@ -28,7 +28,7 @@ export const fanficRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string(),
-        url: z.url(),
+        url: z.url().nullish(),
         author: z.string(),
         website: z.string(),
         summary: z.string(),
@@ -126,7 +126,7 @@ export const fanficRouter = createTRPCRouter({
       z.object({
         id: z.number(),
         title: z.string(),
-        url: z.url(),
+        url: z.url().nullish(),
         author: z.string(),
         website: z.string(),
         rating: z.enum(Ratings).nullish(),

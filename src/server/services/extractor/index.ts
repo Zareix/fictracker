@@ -5,7 +5,11 @@ import * as ffn from "./ffn";
 export const extractFanficData = async (
   url: string,
 ): Promise<
-  Omit<Fanfic, "id" | "createdAt" | "updatedAt" | "grade" | "userId"> & {
+  Omit<
+    Fanfic,
+    "id" | "createdAt" | "updatedAt" | "grade" | "userId" | "url"
+  > & {
+    url: string | undefined;
     chapters: Array<{
       number: number;
       wordsCount: number;
@@ -27,7 +31,7 @@ export const extractFanficData = async (
   }
   return {
     title: "",
-    url: "",
+    url: undefined,
     author: "",
     website: "",
     summary: "",
@@ -38,14 +42,7 @@ export const extractFanficData = async (
     fandom: [],
     ships: [],
     language: "",
-    chapters: [
-      {
-        number: 1,
-        wordsCount: 0,
-        url: "",
-        title: "",
-      },
-    ],
+    chapters: [],
   };
 };
 
