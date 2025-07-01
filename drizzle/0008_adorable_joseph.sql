@@ -1,4 +1,4 @@
-PRAGMA foreign_keys=OFF;--> statement-breakpoint
+PRAGMA defer_foreign_keys=ON;--> statement-breakpoint
 CREATE TABLE `__new_fanfic` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`title` text(256) NOT NULL,
@@ -23,5 +23,5 @@ CREATE TABLE `__new_fanfic` (
 INSERT INTO `__new_fanfic`("id", "title", "url", "author", "website", "summary", "likes_count", "rating", "tags", "is_completed", "fandom", "ships", "language", "grade", "user_id", "created_at", "updatedAt") SELECT "id", "title", "url", "author", "website", "summary", "likes_count", "rating", "tags", "is_completed", "fandom", "ships", "language", "grade", "user_id", "created_at", "updatedAt" FROM `fanfic`;--> statement-breakpoint
 DROP TABLE `fanfic`;--> statement-breakpoint
 ALTER TABLE `__new_fanfic` RENAME TO `fanfic`;--> statement-breakpoint
-PRAGMA foreign_keys=ON;--> statement-breakpoint
+PRAGMA defer_foreign_keys=OFF;
 CREATE INDEX `fanfic_title_idx` ON `fanfic` (`title`);
