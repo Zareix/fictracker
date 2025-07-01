@@ -14,9 +14,10 @@ console.log("Migrating database...");
 
 const sqlite = new Database(env.DATABASE_PATH);
 sqlite.exec("PRAGMA journal_mode = WAL;");
-sqlite.exec("PRAGMA foreign_keys = ON;");
+sqlite.exec("PRAGMA foreign_keys = OFF;");
 const db = drizzle(sqlite);
 migrate(db, { migrationsFolder: "./drizzle" });
+sqlite.exec("PRAGMA foreign_keys = ON;");
 
 console.log("Database migrated");
 
