@@ -90,7 +90,7 @@
     "prettier-plugin-classnames": "^0.7.9",
     "prettier-plugin-merge": "^0.7.4",
     "prettier-plugin-tailwindcss": "^0.6.12",
-    "react-email": "4.0.16",
+    "react-email": "4.2.3",
     "tailwindcss": "^4.1.10",
     "typescript": "^5.8.3"
   },
