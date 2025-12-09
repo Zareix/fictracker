@@ -17,8 +17,8 @@ export const FanficSkeleton = () => {
         </div>
       </CardContent>
       <CardFooter
-        className="text-foreground/80 flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 text-base
-          md:gap-x-6"
+        className="text-foreground/80 flex flex-wrap items-center gap-x-4
+          gap-y-2 pt-1 text-base md:gap-x-6"
       >
         <div className="flex gap-2">
           <BookIcon />

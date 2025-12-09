@@ -97,7 +97,9 @@ export const FiltersButton = () => {
             />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="mr-3 flex w-[calc(100vw-2rem)] flex-col gap-2 p-4 md:w-fit">
+        <PopoverContent
+          className="mr-3 flex w-[calc(100vw-2rem)] flex-col gap-2 p-4 md:w-fit"
+        >
           <Label>Completed</Label>
           <div className="flex items-center gap-2">
             <Select

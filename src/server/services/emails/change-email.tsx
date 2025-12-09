@@ -39,23 +39,32 @@ export default function ChangeEmailAddressEmail({
         <Body className="bg-slate-50 font-sans">
           <Container className="mx-auto max-w-xl py-5 pb-12">
             <Section className="rounded-lg border border-gray-200 bg-white p-10">
-              <Heading className="m-0 mb-5 text-center text-2xl font-semibold text-gray-900">
+              <Heading
+                className="m-0 mb-5 text-center text-2xl font-semibold
+                  text-gray-900"
+              >
                 {title}
               </Heading>
-              <Text className="m-0 mb-6 text-center text-base leading-6 text-gray-600">
+              <Text
+                className="m-0 mb-6 text-center text-base leading-6
+                  text-gray-600"
+              >
                 We received a request to change your email address. Please click
                 the button below to confirm this change:
               </Text>
               <Section className="my-6 text-center">
                 <Button
                   href={url}
-                  className="rounded-lg bg-blue-600 px-6 py-3 text-center text-base font-medium text-white
-                    no-underline hover:bg-blue-700"
+                  className="rounded-lg bg-blue-600 px-6 py-3 text-center
+                    text-base font-medium text-white no-underline
+                    hover:bg-blue-700"
                 >
                   Confirm Email Change
                 </Button>
               </Section>
-              <Text className="m-0 mb-4 text-center text-sm leading-5 text-gray-500">
+              <Text
+                className="m-0 mb-4 text-center text-sm leading-5 text-gray-500"
+              >
                 If you didn&apos;t request this change, you can safely ignore
                 this email.
               </Text>

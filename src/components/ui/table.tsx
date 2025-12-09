@@ -38,7 +38,8 @@ const TableFooter = ({
 const TableRow = ({ className, ...props }: React.ComponentProps<"tr">) => (
   <tr
     className={cn(
-      "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+      `hover:bg-muted/50 data-[state=selected]:bg-muted border-b
+      transition-colors`,
       className,
     )}
     {...props}
@@ -59,7 +60,8 @@ const TableHead = ({ className, ...props }: React.ComponentProps<"th">) => (
 const TableCell = ({ className, ...props }: React.ComponentProps<"td">) => (
   <td
     className={cn(
-      "overflow-clip p-4 align-middle text-ellipsis [&:has([role=checkbox])]:pr-0",
+      `overflow-clip p-4 align-middle text-ellipsis
+      [&:has([role=checkbox])]:pr-0`,
       className,
     )}
     {...props}

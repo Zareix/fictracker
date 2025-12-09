@@ -53,7 +53,8 @@ const NavbarItem = ({
   >
     <Link
       href={item.url}
-      className="flex h-full items-center justify-center gap-2 text-xl font-bold"
+      className="flex h-full items-center justify-center gap-2 text-xl
+        font-bold"
     >
       <item.icon size={26} />
     </Link>
@@ -66,10 +67,14 @@ export const Navbar = () => {
   const navBarItems = NAV_ITEMS;
   return (
     <nav
-      className="border-border bg-background/80 fixed right-0 bottom-0 left-0 z-10 flex h-14
-        items-center justify-between border-t px-4 backdrop-blur md:px-8"
+      className="border-border bg-background/80 fixed right-0 bottom-0 left-0
+        z-10 flex h-14 items-center justify-between border-t px-4 backdrop-blur
+        md:px-8"
     >
-      <div className="grid h-full w-full grid-cols-5 content-center items-center justify-around gap-2">
+      <div
+        className="grid h-full w-full grid-cols-5 content-center items-center
+          justify-around gap-2"
+      >
         {navBarItems.slice(0, navBarItems.length / 2).map((item) => (
           <NavbarItem key={item.title} {...item} pathname={router.pathname} />
         ))}

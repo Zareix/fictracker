@@ -182,7 +182,10 @@ const FanficListItem = ({
       <Card className="mt-3 opacity-50">
         <CardContent>
           <h2 className="text-center text-xl font-semibold">{fanfic.title}</h2>
-          <div className="text-foreground/80 flex flex-wrap gap-x-4 gap-y-2 pt-1 text-base md:gap-x-6">
+          <div
+            className="text-foreground/80 flex flex-wrap gap-x-4 gap-y-2 pt-1
+              text-base md:gap-x-6"
+          >
             <div className="flex gap-2">
               <BookOpenCheckIcon />
               <span>TBR</span>
@@ -217,7 +220,10 @@ const FanficListItem = ({
               {firstShip && <Badge variant="secondary">{firstShip}</Badge>}
             </div>
           </CardContent>
-          <CardFooter className="text-foreground/80 flex items-center gap-x-4 gap-y-2 pt-2 text-sm md:gap-x-6">
+          <CardFooter
+            className="text-foreground/80 flex items-center gap-x-4 gap-y-2 pt-2
+              text-sm md:gap-x-6"
+          >
             <div className="flex items-center gap-2">
               <ProgressToStatus
                 isCompleted={fanfic.isCompleted}

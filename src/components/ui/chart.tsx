@@ -59,8 +59,9 @@ const ChartContainer = React.forwardRef<
           [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border
           [&_.recharts-radial-bar-background-sector]:fill-muted
           [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted
-          [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex aspect-video
-          justify-center text-xs [&_.recharts-dot[stroke='#fff']]:stroke-transparent
+          [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border flex
+          aspect-video justify-center text-xs
+          [&_.recharts-dot[stroke='#fff']]:stroke-transparent
           [&_.recharts-layer]:outline-none [&_.recharts-sector]:outline-none
           [&_.recharts-sector[stroke='#fff']]:stroke-transparent
           [&_.recharts-surface]:outline-none`,
@@ -198,8 +199,8 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          `border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg
-          border px-2.5 py-1.5 text-xs shadow-xl`,
+          `border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5
+          rounded-lg border px-2.5 py-1.5 text-xs shadow-xl`,
           className,
         )}
       >
@@ -215,8 +216,8 @@ const ChartTooltipContent = React.forwardRef<
               <div
                 key={item.dataKey}
                 className={cn(
-                  `[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2
-                  [&>svg]:h-2.5 [&>svg]:w-2.5`,
+                  `[&>svg]:text-muted-foreground flex w-full flex-wrap
+                  items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5`,
                   indicator === "dot" && "items-center",
                 )}
               >
@@ -231,7 +232,8 @@ const ChartTooltipContent = React.forwardRef<
                       !hideIndicator && (
                         <div
                           className={cn(
-                            "shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]",
+                            `shrink-0 rounded-[2px] border-[--color-border]
+                              bg-[--color-bg]`,
                             {
                               "h-2.5 w-2.5": indicator === "dot",
                               "w-1": indicator === "line",
@@ -267,7 +269,10 @@ const ChartTooltipContent = React.forwardRef<
                         (valueFormatter ? (
                           valueFormatter(item.value)
                         ) : (
-                          <span className="text-foreground font-mono font-medium tabular-nums">
+                          <span
+                            className="text-foreground font-mono font-medium
+                              tabular-nums"
+                          >
                             {item.value.toLocaleString()}
                           </span>
                         ))}
@@ -323,7 +328,8 @@ const ChartLegendContent = React.forwardRef<
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               key={item.value}
               className={cn(
-                "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
+                `[&>svg]:text-muted-foreground flex items-center gap-1.5
+                [&>svg]:h-3 [&>svg]:w-3`,
               )}
             >
               {itemConfig?.icon && !hideIcon ? (

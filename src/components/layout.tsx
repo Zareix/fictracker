@@ -15,7 +15,10 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           <title>Sub Tracker - Login</title>
           <meta name="description" content="Track your subscriptions" />
         </Head>
-        <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+        <main
+          className="flex min-h-svh flex-col items-center justify-center gap-6
+            p-6 md:p-10"
+        >
           <LoginForm />
         </main>
       </>
@@ -29,8 +32,8 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         <meta name="description" content="Track your subscriptions" />
       </Head>
       <main
-        className="bg-background relative container mx-auto min-h-screen px-4 pt-8 pb-20
-          xl:max-w-5xl"
+        className="bg-background relative container mx-auto min-h-screen px-4
+          pt-8 pb-20 xl:max-w-5xl"
         data-vaul-drawer-wrapper
       >
         {children}

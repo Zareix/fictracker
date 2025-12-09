@@ -57,7 +57,8 @@ const multiSelectVariants = cva(
  * Props for MultiSelect component
  */
 interface MultiSelectProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof multiSelectVariants> {
   /**
    * An array of option objects to be displayed in the multi-select component.
@@ -208,9 +209,10 @@ export const MultiSelect = ({
           onClick={handleTogglePopover}
           variant="outline"
           className={cn(
-            `border-input hover:border-input flex h-auto min-h-10 w-full items-center
-            justify-between rounded-md border bg-inherit p-1 shadow-none hover:bg-inherit
-            hover:brightness-100 [&_svg]:pointer-events-auto`,
+            `border-input hover:border-input flex h-auto min-h-10 w-full
+            items-center justify-between rounded-md border bg-inherit p-1
+            shadow-none hover:bg-inherit hover:brightness-100
+            [&_svg]:pointer-events-auto`,
             className,
           )}
         >
@@ -232,7 +234,10 @@ export const MultiSelect = ({
                       {IconComponent && (
                         <IconComponent className="mr-2 size-4" />
                       )}
-                      <span className="max-w-[6rem] overflow-hidden text-ellipsis whitespace-nowrap">
+                      <span
+                        className="max-w-[6rem] overflow-hidden text-ellipsis
+                          whitespace-nowrap"
+                      >
                         {option?.label}
                       </span>
                       <XCircle
@@ -248,7 +253,8 @@ export const MultiSelect = ({
                 {selectedValues.length > maxCount && (
                   <Badge
                     className={cn(
-                      "border-foreground/1 text-foreground bg-transparent hover:bg-transparent",
+                      `border-foreground/1 text-foreground bg-transparent
+                        hover:bg-transparent`,
                       isAnimating ? "animate-bounce" : "",
                       multiSelectVariants({ variant }),
                     )}
@@ -277,7 +283,9 @@ export const MultiSelect = ({
                   orientation="vertical"
                   className="flex h-full min-h-6"
                 />
-                <ChevronDown className="text-muted-foreground mx-2 h-4 cursor-pointer" />
+                <ChevronDown
+                  className="text-muted-foreground mx-2 h-4 cursor-pointer"
+                />
               </div>
             </div>
           ) : (
@@ -285,7 +293,9 @@ export const MultiSelect = ({
               <span className="text-muted-foreground mx-3 text-sm">
                 {placeholder}
               </span>
-              <ChevronDown className="text-muted-foreground mx-2 h-4 cursor-pointer" />
+              <ChevronDown
+                className="text-muted-foreground mx-2 h-4 cursor-pointer"
+              />
             </div>
           )}
         </Button>
@@ -314,7 +324,8 @@ export const MultiSelect = ({
               >
                 <div
                   className={cn(
-                    "border-primary mr-2 flex size-4 items-center justify-center rounded-sm border",
+                    `border-primary mr-2 flex size-4 items-center justify-center
+                    rounded-sm border`,
                     selectedValues.length === options.length
                       ? "bg-primary text-primary-foreground"
                       : "opacity-50 [&_svg]:invisible",
@@ -334,7 +345,8 @@ export const MultiSelect = ({
                   >
                     <div
                       className={cn(
-                        "border-primary mr-2 flex size-4 items-center justify-center rounded-sm border",
+                        `border-primary mr-2 flex size-4 items-center
+                        justify-center rounded-sm border`,
                         isSelected
                           ? "bg-primary text-primary-foreground"
                           : "opacity-50 [&_svg]:invisible",
